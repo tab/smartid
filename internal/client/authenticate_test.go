@@ -74,6 +74,7 @@ func Test_Authenticate(t *testing.T) {
 				config.WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000"),
 				config.WithURL(testServer.URL),
 			)
+			assert.NoError(t, err)
 
 			response, err := client.Authenticate(tt.param)
 
