@@ -25,7 +25,8 @@ func main() {
 		log.Fatalf("Failed to create Smart-ID client: %v", err)
 	}
 
-	response, err := smartIdClient.Authenticate("PNOEE-30303039914")
+	identity := client.NewIdentity(client.TypePNO, "EE", "30303039914")
+	response, err := smartIdClient.Authenticate(identity)
 	if err != nil {
 		log.Fatalf("Authentication failed: %v", err)
 	}
