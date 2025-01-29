@@ -1,4 +1,4 @@
-module smartid
+module github.com/tab/smartid
 
 go 1.23
 

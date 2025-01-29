@@ -1,11 +1,11 @@
-package client
+package smartid
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"smartid/internal/config"
+	"github.com/tab/smartid/config"
 )
 
 func Test_NewClient(t *testing.T) {

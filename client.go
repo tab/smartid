@@ -1,17 +1,17 @@
-package client
+package smartid
 
 import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
 
-	"smartid/internal/config"
-	"smartid/internal/errors"
+	"github.com/tab/smartid/config"
+	"github.com/tab/smartid/internal/errors"
+	"github.com/tab/smartid/internal/utils"
 )
 
 const (
 	CertificateLevel = "QUALIFIED"
-	HashType         = "SHA512"
 	InteractionType  = "displayTextAndPIN"
 	Timeout          = 60
 	URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
@@ -27,7 +27,7 @@ type Client struct {
 func NewClient(opts ...config.Option) (*Client, error) {
 	cfg := &config.Config{
 		CertificateLevel: CertificateLevel,
-		HashType:         HashType,
+		HashType:         utils.HashTypeSHA512,
 		InteractionType:  InteractionType,
 		URL:              URL,
 		Timeout:          Timeout,
