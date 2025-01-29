@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"smartid/internal/config"
-	"smartid/internal/errors"
+	"github.com/tab/smart-id/internal/config"
+	"github.com/tab/smart-id/internal/errors"
 )
 
 const (

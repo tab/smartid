@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"smartid/internal/client"
-	"smartid/internal/config"
+	"github.com/tab/smart-id/internal/client"
+	"github.com/tab/smart-id/internal/config"
 )
 
 func main() {

@@ -11,8 +11,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"smartid/internal/errors"
-	"smartid/internal/models"
+	"github.com/tab/smart-id/internal/errors"
+	"github.com/tab/smart-id/internal/models"
 )
 
 // Authenticate sends an authentication request to the Smart-ID provider

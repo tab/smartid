@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"smartid/internal/errors"
-	"smartid/internal/models"
+	"github.com/tab/smart-id/internal/errors"
+	"github.com/tab/smart-id/internal/models"
 )
 
 // Status fetches the status of a Smart-ID session

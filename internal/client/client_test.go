@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"smartid/internal/config"
+	"github.com/tab/smart-id/internal/config"
 )
 
 func Test_NewClient(t *testing.T) {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"smartid/internal/config"
-	"smartid/internal/models"
+	"github.com/tab/smart-id/internal/config"
+	"github.com/tab/smart-id/internal/models"
 )
 
 func Test_Session_Status(t *testing.T) {
