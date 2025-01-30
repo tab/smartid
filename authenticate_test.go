@@ -1,24 +1,25 @@
-package client
+package smartid
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"smartid/internal/config"
-	"smartid/internal/models"
+	"github.com/tab/smartid/config"
+	"github.com/tab/smartid/internal/models"
 )
 
-func Test_Session_Status(t *testing.T) {
-	id := "8fdb516d-1a82-43ba-b82d-be63df569b86"
+func Test_Authenticate(t *testing.T) {
+	ctx := context.Background()
 
 	tests := []struct {
 		name     string
 		before   func(w http.ResponseWriter, r *http.Request)
-		id       string
-		expected *models.SessionResponse
+		param    string
+		expected *models.AuthenticationResponse
 		error    bool
 	}{
 		{
@@ -43,8 +44,8 @@ func Test_Session_Status(t *testing.T) {
 	"interactionFlowUsed": "displayTextAndPIN"
 }`))
 			},
-			id: id,
-			expected: &models.SessionResponse{
+			param: "PNOEE-30303039914",
+			expected: &models.AuthenticationResponse{
 				State: "COMPLETE",
 				Result: models.Result{
 					EndResult:      "OK",
@@ -68,8 +69,8 @@ func Test_Session_Status(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "USER_REFUSED"}}`))
 			},
-			id: id,
-			expected: &models.SessionResponse{
+			param: "PNOEE-30303039914",
+			expected: &models.AuthenticationResponse{
 				State: "COMPLETE",
 				Result: models.Result{
 					EndResult: "USER_REFUSED",
@@ -83,8 +84,8 @@ func Test_Session_Status(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "TIMEOUT"}}`))
 			},
-			id: id,
-			expected: &models.SessionResponse{
+			param: "PNOEE-30303039914",
+			expected: &models.AuthenticationResponse{
 				State: "COMPLETE",
 				Result: models.Result{
 					EndResult: "TIMEOUT",
@@ -93,25 +94,14 @@ func Test_Session_Status(t *testing.T) {
 			error: false,
 		},
 		{
-			name: "Not found",
-			before: func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusNotFound)
-				w.Write([]byte(`{"title": "Not Found", "status": 404}`))
-			},
-			id:       id,
-			expected: &models.SessionResponse{},
-			error:    true,
-		},
-		{
 			name: "Bad Request",
 			before: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"title": "Bad Request", "status": 400}`))
 			},
-			id:       id,
-			expected: &models.SessionResponse{},
+			param:    "PNOEE-30303039914",
+			expected: &models.AuthenticationResponse{},
 			error:    true,
 		},
 	}
@@ -128,7 +118,7 @@ func Test_Session_Status(t *testing.T) {
 			)
 			assert.NoError(t, err)
 
-			response, err := client.Status(tt.id)
+			response, err := client.Authenticate(ctx, tt.param)
 
 			if tt.error {
 				assert.Error(t, err)
