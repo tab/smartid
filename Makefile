@@ -13,6 +13,11 @@ vet:
 	@echo "Running go vet..."
 	go vet ./...
 
+.PHONY: staticcheck
+staticcheck:
+	@echo "Running staticcheck..."
+	staticcheck ./...
+
 .PHONY: test
 test:
 	@echo "Running tests..."

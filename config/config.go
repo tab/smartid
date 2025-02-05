@@ -15,14 +15,14 @@ type Config struct {
 // Option is a type for functional options
 type Option func(*Config)
 
-// WithRelayingPartyName is option to set the RelyingPartyName
+// WithRelyingPartyName is option to set the RelyingPartyName
 func WithRelyingPartyName(name string) Option {
 	return func(c *Config) {
 		c.RelyingPartyName = name
 	}
 }
 
-// WithRelayingPartyUUID is option to set the RelyingPartyUUID
+// WithRelyingPartyUUID is option to set the RelyingPartyUUID
 func WithRelyingPartyUUID(id string) Option {
 	return func(c *Config) {
 		c.RelyingPartyUUID = id
