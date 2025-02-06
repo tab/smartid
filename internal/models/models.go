@@ -42,3 +42,10 @@ type AuthenticationResponse struct {
 	Cert                Certificate `json:"cert"`
 	InteractionFlowUsed string      `json:"interactionFlowUsed"`
 }
+
+type Person struct {
+	IdentityNumber string
+	PersonalCode   string
+	FirstName      string
+	LastName       string
+}

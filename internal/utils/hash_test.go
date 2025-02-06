@@ -70,7 +70,7 @@ func Test_VerificationCode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			code, err := VerificationCode(tt.hash)
+			code, err := GenerateVerificationCode(tt.hash)
 
 			if tt.error {
 				assert.Error(t, err)

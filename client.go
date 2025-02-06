@@ -5,15 +5,14 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"github.com/tab/smartid/config"
-	"github.com/tab/smartid/internal/errors"
+	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/utils"
 )
 
 const (
 	CertificateLevel = "QUALIFIED"
 	InteractionType  = "displayTextAndPIN"
-	Timeout          = 60
+	Timeout          = 60 * time.Second
 	URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
 )
 
@@ -24,7 +23,7 @@ type Client struct {
 }
 
 // NewClient creates a new Smart-ID client instance
-func NewClient(opts ...config.Option) (*Client, error) {
+func NewClient() *Client {
 	cfg := &config.Config{
 		CertificateLevel: CertificateLevel,
 		HashType:         utils.HashTypeSHA512,
@@ -33,33 +32,61 @@ func NewClient(opts ...config.Option) (*Client, error) {
 		Timeout:          Timeout,
 	}
 
-	for _, opt := range opts {
-		opt(cfg)
-	}
-
-	if err := validateConfig(cfg); err != nil {
-		return nil, err
-	}
-
 	httpClient := resty.New().
-		SetTimeout(time.Duration(cfg.Timeout)*time.Second).
+		SetTimeout(cfg.Timeout).
 		SetHeader("Accept", "application/json").
 		SetHeader("Content-Type", "application/json")
 
 	return &Client{
 		config:     cfg,
 		httpClient: httpClient,
-	}, nil
+	}
 }
 
-func validateConfig(cfg *config.Config) error {
-	if cfg.RelyingPartyName == "" {
-		return errors.ErrMissingRelyingPartyName
-	}
+// WithRelyingPartyName is option to set the RelyingPartyName
+func (c *Client) WithRelyingPartyName(name string) *Client {
+	c.config.RelyingPartyName = name
+	return c
+}
 
-	if cfg.RelyingPartyUUID == "" {
-		return errors.ErrMissingRelyingPartyUUID
-	}
+// WithRelyingPartyUUID is option to set the RelyingPartyUUID
+func (c *Client) WithRelyingPartyUUID(id string) *Client {
+	c.config.RelyingPartyUUID = id
+	return c
+}
 
-	return nil
+// WithCertificateLevel is option to set the certificate level
+func (c *Client) WithCertificateLevel(level string) *Client {
+	c.config.CertificateLevel = level
+	return c
+}
+
+// WithHashType is option to set the hash type
+func (c *Client) WithHashType(hashType string) *Client {
+	c.config.HashType = hashType
+	return c
+}
+
+// WithInteractionType is option to set the interaction type
+func (c *Client) WithInteractionType(interactionType string) *Client {
+	c.config.InteractionType = interactionType
+	return c
+}
+
+// WithText is option to set the display text
+func (c *Client) WithText(text string) *Client {
+	c.config.Text = text
+	return c
+}
+
+// WithURL is option to set the Smart-ID service URL
+func (c *Client) WithURL(url string) *Client {
+	c.config.URL = url
+	return c
+}
+
+// WithTimeout is option to set the request timeout
+func (c *Client) WithTimeout(timeout time.Duration) *Client {
+	c.config.Timeout = timeout
+	return c
 }

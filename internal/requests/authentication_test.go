@@ -10,7 +10,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/tab/smartid/config"
+	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/models"
 )
 
@@ -23,10 +23,10 @@ func Test_Call(t *testing.T) {
 		InteractionType:  "displayTextAndPIN",
 		Text:             "Enter PIN1",
 		HashType:         "SHA512",
-		Timeout:          10,
+		Timeout:          10 * time.Second,
 	}
 	httpClient := resty.New().
-		SetTimeout(time.Duration(cfg.Timeout)*time.Second).
+		SetTimeout(cfg.Timeout).
 		SetHeader("Accept", "application/json").
 		SetHeader("Content-Type", "application/json")
 
@@ -150,10 +150,10 @@ func Test_createAuthenticationSession(t *testing.T) {
 		InteractionType:  "displayTextAndPIN",
 		Text:             "Enter PIN1",
 		HashType:         "SHA512",
-		Timeout:          10,
+		Timeout:          10 * time.Second,
 	}
 	httpClient := resty.New().
-		SetTimeout(time.Duration(cfg.Timeout)*time.Second).
+		SetTimeout(cfg.Timeout).
 		SetHeader("Accept", "application/json").
 		SetHeader("Content-Type", "application/json")
 
@@ -238,10 +238,10 @@ func Test_fetchAuthenticationSession(t *testing.T) {
 		InteractionType:  "displayTextAndPIN",
 		Text:             "Enter PIN1",
 		HashType:         "SHA512",
-		Timeout:          10,
+		Timeout:          10 * time.Second,
 	}
 	httpClient := resty.New().
-		SetTimeout(time.Duration(cfg.Timeout)*time.Second).
+		SetTimeout(cfg.Timeout).
 		SetHeader("Accept", "application/json").
 		SetHeader("Content-Type", "application/json")
 
