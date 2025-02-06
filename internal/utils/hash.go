@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
+	"strings"
 
 	"github.com/tab/smartid/internal/errors"
 )
@@ -20,19 +21,22 @@ const (
 
 	// HashTypeSHA512 is the hash type for SHA-512
 	HashTypeSHA512 = "SHA512"
+
+	// RandomBytesLength is length of random bytes
+	RandomBytesLength = 64
 )
 
 // GenerateHash generates a random hash based on the given hash type
 func GenerateHash(hashType string) (string, error) {
-	randBytes := make([]byte, 64)
+	randBytes := make([]byte, RandomBytesLength)
 	_, err := rand.Read(randBytes)
 	if err != nil {
-		return "", err
+		return "", errors.ErrFailedToGenerateRandomBytes
 	}
 
 	var encodedHash string
 
-	switch hashType {
+	switch strings.ToUpper(hashType) {
 	case HashTypeSHA256:
 		hash := sha256.Sum256(randBytes)
 		encodedHash = base64.StdEncoding.EncodeToString(hash[:])
@@ -49,8 +53,8 @@ func GenerateHash(hashType string) (string, error) {
 	return encodedHash, nil
 }
 
-// VerificationCode generates a verification code based on the given hash
-func VerificationCode(hash string) (string, error) {
+// GenerateVerificationCode generates a verification code based on the given hash
+func GenerateVerificationCode(hash string) (string, error) {
 	decodedHash, err := base64.StdEncoding.DecodeString(hash)
 	if err != nil {
 		return "", err

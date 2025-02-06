@@ -4,27 +4,21 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/tab/smartid"
-	"github.com/tab/smartid/config"
 )
 
 func main() {
-	// Full example of how to use the Smart-ID client
-	client, err := smartid.NewClient(
-		config.WithRelyingPartyName("DEMO"),
-		config.WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000"),
-		config.WithCertificateLevel("QUALIFIED"),
-		config.WithHashType("SHA512"),
-		config.WithInteractionType("displayTextAndPIN"),
-		config.WithText("Enter PIN1"),
-		config.WithURL("https://sid.demo.sk.ee/smart-id-rp/v2"),
-		config.WithTimeout(60),
-	)
-
-	if err != nil {
-		log.Fatalf("Failed to create Smart-ID client: %v", err)
-	}
+	client := smartid.NewClient().
+		WithRelyingPartyName("DEMO").
+		WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
+		WithCertificateLevel("QUALIFIED").
+		WithHashType("SHA512").
+		WithInteractionType("displayTextAndPIN").
+		WithText("Enter PIN1").
+		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
+		WithTimeout(60 * time.Second)
 
 	ctx := context.Background()
 	identity := smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914")

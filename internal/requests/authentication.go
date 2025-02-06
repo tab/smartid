@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"github.com/tab/smartid/config"
+	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/errors"
 	"github.com/tab/smartid/internal/models"
 	"github.com/tab/smartid/internal/utils"
@@ -24,7 +24,7 @@ func Call(context context.Context, client *resty.Client, config *config.Config, 
 }
 
 func createAuthenticationSession(
-	_ context.Context,
+	ctx context.Context,
 	httpClient *resty.Client,
 	cfg *config.Config,
 	identity string,
@@ -50,7 +50,7 @@ func createAuthenticationSession(
 	}
 
 	endpoint := fmt.Sprintf("%s/authentication/etsi/%s", cfg.URL, identity)
-	response, err := httpClient.R().SetBody(body).Post(endpoint)
+	response, err := httpClient.R().SetContext(ctx).SetBody(body).Post(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func createAuthenticationSession(
 		return nil, err
 	}
 
-	code, err := utils.VerificationCode(hash)
+	code, err := utils.GenerateVerificationCode(hash)
 	if err != nil {
 		return nil, err
 	}
@@ -76,14 +76,14 @@ func createAuthenticationSession(
 }
 
 func fetchAuthenticationSession(
-	_ context.Context,
+	ctx context.Context,
 	httpClient *resty.Client,
 	cfg *config.Config,
 	sessionId string,
 ) (*models.AuthenticationResponse, error) {
 	endpoint := fmt.Sprintf("%s/session/%s", cfg.URL, sessionId)
 
-	response, err := httpClient.R().Get(endpoint)
+	response, err := httpClient.R().SetContext(ctx).Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
