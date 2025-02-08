@@ -22,11 +22,13 @@ func main() {
 
 	ctx := context.Background()
 	identity := smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914")
-	result, err := client.Authenticate(ctx, identity)
-	if err != nil {
-		log.Fatalf("Authentication failed: %v", err)
+
+	resultCh := client.Authenticate(ctx, identity)
+	result := <-resultCh
+
+	if result.Err != nil {
+		log.Fatalf("Authentication failed: %v", result.Err)
 	}
 
-	fmt.Println("result")
-	fmt.Println(result)
+	fmt.Println(result.Person)
 }

@@ -9,23 +9,39 @@ import (
 	"github.com/tab/smartid/internal/utils"
 )
 
-// Authenticate sends an authentication request to the Smart-ID provider
-func (c *Client) Authenticate(context context.Context, nationalIdentityNumber string) (*models.Person, error) {
-	if err := c.Validate(); err != nil {
-		return nil, err
-	}
+// Result holds the authentication result
+type Result struct {
+	Person *models.Person
+	Err    error
+}
 
-	result, err := requests.Call(context, c.httpClient, c.config, nationalIdentityNumber)
-	if err != nil {
-		return nil, err
-	}
+// Authenticate makes an authentication with the Smart-ID provider
+func (c *Client) Authenticate(ctx context.Context, nationalIdentityNumber string) <-chan Result {
+	result := make(chan Result, 1)
 
-	person, err := utils.Extract(result.Cert.Value)
-	if err != nil {
-		return nil, err
-	}
+	go func() {
+		session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
+		if err != nil {
+			result <- Result{nil, err}
+			return
+		}
 
-	return person, nil
+		response, err := requests.FetchAuthenticationSession(ctx, c.config, session.SessionID)
+		if err != nil {
+			result <- Result{nil, err}
+			return
+		}
+
+		person, err := utils.Extract(response.Cert.Value)
+		if err != nil {
+			result <- Result{nil, err}
+			return
+		}
+
+		result <- Result{person, nil}
+	}()
+
+	return result
 }
 
 func (c *Client) Validate() error {
