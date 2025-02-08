@@ -27,7 +27,7 @@ func CreateAuthenticationSession(
 	ctx context.Context,
 	cfg *config.Config,
 	identity string,
-) (*models.AuthenticationSessionResponse, error) {
+) (*models.Session, error) {
 	hash, err := utils.GenerateHash(cfg.HashType)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func CreateAuthenticationSession(
 		return nil, errors.ErrSmartIdProviderError
 	}
 
-	var result models.AuthenticationSessionResponse
+	var result models.Session
 	if err = json.Unmarshal(response.Body(), &result); err != nil {
 		return nil, err
 	}
@@ -68,9 +68,9 @@ func CreateAuthenticationSession(
 		return nil, err
 	}
 
-	return &models.AuthenticationSessionResponse{
-		SessionID: result.SessionID,
-		Code:      code,
+	return &models.Session{
+		Id:   result.Id,
+		Code: code,
 	}, nil
 }
 
