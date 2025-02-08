@@ -23,7 +23,9 @@ func main() {
 	ctx := context.Background()
 	identity := smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914")
 
-	resultCh := client.Authenticate(ctx, identity)
+	session, resultCh := client.Authenticate(ctx, identity)
+	fmt.Println(session)
+
 	result := <-resultCh
 
 	if result.Err != nil {
