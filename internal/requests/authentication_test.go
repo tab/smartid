@@ -29,7 +29,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 		name     string
 		before   func(w http.ResponseWriter, r *http.Request)
 		identity string
-		expected *models.AuthenticationSessionResponse
+		expected *models.Session
 		error    bool
 	}{
 		{
@@ -40,9 +40,9 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
 			},
 			identity: "PNOEE-30303039914",
-			expected: &models.AuthenticationSessionResponse{
-				SessionID: "8fdb516d-1a82-43ba-b82d-be63df569b86",
-				Code:      "1234",
+			expected: &models.Session{
+				Id:   "8fdb516d-1a82-43ba-b82d-be63df569b86",
+				Code: "1234",
 			},
 			error: false,
 		},
@@ -50,7 +50,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 			name:     "Error",
 			before:   func(w http.ResponseWriter, r *http.Request) {},
 			identity: "not-a-personal-code",
-			expected: &models.AuthenticationSessionResponse{},
+			expected: &models.Session{},
 			error:    true,
 		},
 		{
@@ -61,7 +61,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 				w.Write([]byte(`{"title": "Not Found", "status": 404}`))
 			},
 			identity: "PNOEE-30303039914",
-			expected: &models.AuthenticationSessionResponse{},
+			expected: &models.Session{},
 			error:    true,
 		},
 		{
@@ -72,7 +72,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 				w.Write([]byte(`{"title": "Bad Request", "status": 400}`))
 			},
 			identity: "PNOEE-30303039914",
-			expected: &models.AuthenticationSessionResponse{},
+			expected: &models.Session{},
 			error:    true,
 		},
 	}
@@ -90,7 +90,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expected.SessionID, response.SessionID)
+				assert.Equal(t, tt.expected.Id, response.Id)
 			}
 		})
 	}

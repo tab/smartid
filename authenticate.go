@@ -19,7 +19,7 @@ type Result struct {
 func (c *Client) Authenticate(
 	ctx context.Context,
 	nationalIdentityNumber string,
-) (*models.AuthenticationSessionResponse, <-chan Result) {
+) (*models.Session, <-chan Result) {
 	result := make(chan Result, 1)
 
 	session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
@@ -29,7 +29,7 @@ func (c *Client) Authenticate(
 	}
 
 	go func() {
-		response, err := requests.FetchAuthenticationSession(ctx, c.config, session.SessionID)
+		response, err := requests.FetchAuthenticationSession(ctx, c.config, session.Id)
 		if err != nil {
 			result <- Result{nil, err}
 			return

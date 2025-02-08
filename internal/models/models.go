@@ -15,11 +15,6 @@ type AuthenticationSessionRequest struct {
 	AllowedInteractionsOrder []AllowedInteraction `json:"allowedInteractionsOrder"`
 }
 
-type AuthenticationSessionResponse struct {
-	SessionID string `json:"sessionID"`
-	Code      string `json:"code"`
-}
-
 type Result struct {
 	EndResult      string `json:"endResult"`
 	DocumentNumber string `json:"documentNumber"`
@@ -41,6 +36,11 @@ type AuthenticationResponse struct {
 	Signature           Signature   `json:"signature"`
 	Cert                Certificate `json:"cert"`
 	InteractionFlowUsed string      `json:"interactionFlowUsed"`
+}
+
+type Session struct {
+	Id   string `json:"sessionID"`
+	Code string `json:"code"`
 }
 
 type Person struct {
