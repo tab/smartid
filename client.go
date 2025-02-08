@@ -3,8 +3,6 @@ package smartid
 import (
 	"time"
 
-	"github.com/go-resty/resty/v2"
-
 	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/utils"
 )
@@ -18,8 +16,7 @@ const (
 
 // Client holds the client configuration and the HTTP client
 type Client struct {
-	config     *config.Config
-	httpClient *resty.Client
+	config *config.Config
 }
 
 // NewClient creates a new Smart-ID client instance
@@ -32,14 +29,8 @@ func NewClient() *Client {
 		Timeout:          Timeout,
 	}
 
-	httpClient := resty.New().
-		SetTimeout(cfg.Timeout).
-		SetHeader("Accept", "application/json").
-		SetHeader("Content-Type", "application/json")
-
 	return &Client{
-		config:     cfg,
-		httpClient: httpClient,
+		config: cfg,
 	}
 }
 

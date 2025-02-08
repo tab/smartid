@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 
@@ -14,18 +15,16 @@ import (
 	"github.com/tab/smartid/internal/utils"
 )
 
-func Call(context context.Context, client *resty.Client, config *config.Config, identity string) (*models.AuthenticationResponse, error) {
-	result, err := createAuthenticationSession(context, client, config, identity)
-	if err != nil {
-		return nil, err
-	}
+const (
+	MaxIdleConnections        = 10000
+	MaxIdleConnectionsPerHost = 10000
+	IdleConnTimeout           = 90 * time.Second
+	TLSHandshakeTimeout       = 10 * time.Second
+	Timeout                   = 60 * time.Second
+)
 
-	return fetchAuthenticationSession(context, client, config, result.SessionID)
-}
-
-func createAuthenticationSession(
+func CreateAuthenticationSession(
 	ctx context.Context,
-	httpClient *resty.Client,
 	cfg *config.Config,
 	identity string,
 ) (*models.AuthenticationSessionResponse, error) {
@@ -50,7 +49,7 @@ func createAuthenticationSession(
 	}
 
 	endpoint := fmt.Sprintf("%s/authentication/etsi/%s", cfg.URL, identity)
-	response, err := httpClient.R().SetContext(ctx).SetBody(body).Post(endpoint)
+	response, err := httpClient().R().SetContext(ctx).SetBody(body).Post(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -75,15 +74,14 @@ func createAuthenticationSession(
 	}, nil
 }
 
-func fetchAuthenticationSession(
+func FetchAuthenticationSession(
 	ctx context.Context,
-	httpClient *resty.Client,
 	cfg *config.Config,
 	sessionId string,
 ) (*models.AuthenticationResponse, error) {
 	endpoint := fmt.Sprintf("%s/session/%s", cfg.URL, sessionId)
 
-	response, err := httpClient.R().SetContext(ctx).Get(endpoint)
+	response, err := httpClient().R().SetContext(ctx).Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -98,4 +96,24 @@ func fetchAuthenticationSession(
 	}
 
 	return &result, nil
+}
+
+func httpClient() *resty.Client {
+	transport := &http.Transport{
+		MaxIdleConns:        MaxIdleConnections,
+		MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
+		IdleConnTimeout:     IdleConnTimeout,
+		TLSHandshakeTimeout: TLSHandshakeTimeout,
+	}
+
+	client := resty.NewWithClient(&http.Client{
+		Transport: transport,
+		Timeout:   Timeout,
+	})
+
+	client.
+		SetHeader("Accept", "application/json").
+		SetHeader("Content-Type", "application/json")
+
+	return client
 }
