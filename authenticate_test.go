@@ -96,13 +96,15 @@ func Test_Authenticate(t *testing.T) {
 				WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
 				WithURL(testServer.URL)
 
-			resultCh := client.Authenticate(ctx, tt.param)
+			session, resultCh := client.Authenticate(ctx, tt.param)
+
 			result := <-resultCh
 
 			if tt.error {
 				assert.Error(t, result.Err)
 				assert.Nil(t, result.Person)
 			} else {
+				assert.NotNil(t, session)
 				assert.NoError(t, result.Err)
 				assert.Equal(t, tt.expected, result.Person)
 			}

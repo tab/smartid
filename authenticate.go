@@ -16,16 +16,19 @@ type Result struct {
 }
 
 // Authenticate makes an authentication with the Smart-ID provider
-func (c *Client) Authenticate(ctx context.Context, nationalIdentityNumber string) <-chan Result {
+func (c *Client) Authenticate(
+	ctx context.Context,
+	nationalIdentityNumber string,
+) (*models.AuthenticationSessionResponse, <-chan Result) {
 	result := make(chan Result, 1)
 
-	go func() {
-		session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
-		if err != nil {
-			result <- Result{nil, err}
-			return
-		}
+	session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
+	if err != nil {
+		result <- Result{nil, err}
+		return nil, result
+	}
 
+	go func() {
 		response, err := requests.FetchAuthenticationSession(ctx, c.config, session.SessionID)
 		if err != nil {
 			result <- Result{nil, err}
@@ -41,7 +44,7 @@ func (c *Client) Authenticate(ctx context.Context, nationalIdentityNumber string
 		result <- Result{person, nil}
 	}()
 
-	return result
+	return session, result
 }
 
 func (c *Client) Validate() error {
