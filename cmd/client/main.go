@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/tab/smartid"
@@ -21,16 +21,28 @@ func main() {
 		WithTimeout(60 * time.Second)
 
 	ctx := context.Background()
-	identity := smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914")
 
-	session, resultCh := client.Authenticate(ctx, identity)
-	fmt.Println(session)
-
-	result := <-resultCh
-
-	if result.Err != nil {
-		log.Fatalf("Authentication failed: %v", result.Err)
+	identities := []string{
+		smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914"),
+		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039917"),
 	}
 
-	fmt.Println(result.Person)
+	for _, identity := range identities {
+		session, resultCh := client.Authenticate(ctx, identity)
+		fmt.Println(session)
+
+		result := <-resultCh
+
+		if result.Err != nil {
+			var err *smartid.Error
+
+			if ok := errors.As(result.Err, &err); ok {
+				fmt.Printf("Authentication failed with code: %s\n", err.Code)
+			} else {
+				fmt.Printf("Authentication failed: %v\n", result.Err)
+			}
+		} else {
+			fmt.Println(result.Person)
+		}
+	}
 }

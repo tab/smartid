@@ -54,24 +54,24 @@ func CreateAuthenticationSession(
 		return nil, err
 	}
 
-	if response.StatusCode() != http.StatusOK {
-		return nil, errors.ErrSmartIdProviderError
+	if response.IsSuccess() {
+		var result models.Session
+		if err = json.Unmarshal(response.Body(), &result); err != nil {
+			return nil, err
+		}
+
+		code, err := utils.GenerateVerificationCode(hash)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.Session{
+			Id:   result.Id,
+			Code: code,
+		}, nil
 	}
 
-	var result models.Session
-	if err = json.Unmarshal(response.Body(), &result); err != nil {
-		return nil, err
-	}
-
-	code, err := utils.GenerateVerificationCode(hash)
-	if err != nil {
-		return nil, err
-	}
-
-	return &models.Session{
-		Id:   result.Id,
-		Code: code,
-	}, nil
+	return nil, errors.ErrSmartIdProviderError
 }
 
 func FetchAuthenticationSession(
@@ -86,16 +86,20 @@ func FetchAuthenticationSession(
 		return nil, err
 	}
 
-	if response.StatusCode() != http.StatusOK {
-		return nil, errors.ErrSmartIdProviderError
+	if response.IsSuccess() {
+		var result models.AuthenticationResponse
+		if err = json.Unmarshal(response.Body(), &result); err != nil {
+			return nil, err
+		}
+
+		return &result, nil
 	}
 
-	var result models.AuthenticationResponse
-	if err = json.Unmarshal(response.Body(), &result); err != nil {
-		return nil, err
+	if response.StatusCode() == http.StatusNotFound {
+		return nil, errors.ErrSmartIdSessionNotFound
 	}
 
-	return &result, nil
+	return nil, errors.ErrSmartIdProviderError
 }
 
 func httpClient() *resty.Client {

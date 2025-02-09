@@ -20,6 +20,7 @@ func Test_Authenticate(t *testing.T) {
 		before   func(w http.ResponseWriter, r *http.Request)
 		param    string
 		expected *models.Person
+		err      error
 		error    bool
 	}{
 		{
@@ -51,7 +52,46 @@ func Test_Authenticate(t *testing.T) {
 				FirstName:      "TESTNUMBER",
 				LastName:       "OK",
 			},
+			err:   nil,
 			error: false,
+		},
+		{
+			name: "Error: Invalid certificate",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte(`
+{
+	"state": "COMPLETE",
+	"result": {
+		"endResult": "OK",
+		"documentNumber": "PNOEE-30303039914"
+	},
+	"signature": {
+		"value": "invalid-signature",
+		"algorithm": "sha256WithRSAEncryption"
+	},
+	"cert": {
+		"value": "invalid-certificate",
+		"certificateLevel": "QUALIFIED"
+	},
+	"interactionFlowUsed": "displayTextAndPIN"
+}`))
+			},
+			param:    "PNOEE-30303039914",
+			expected: &models.Person{},
+			err:      errors.ErrFailedToDecodeCertificate,
+			error:    true,
+		},
+		{
+			name: "Error: Authentication is running",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte(`{"state": "RUNNING"}`))
+			},
+			param:    "PNOEE-30303039914",
+			expected: &models.Person{},
+			err:      errors.ErrAuthenticationIsRunning,
+			error:    true,
 		},
 		{
 			name: "Error: USER_REFUSED",
@@ -61,6 +101,7 @@ func Test_Authenticate(t *testing.T) {
 			},
 			param:    "PNOEE-30303039914",
 			expected: &models.Person{},
+			err:      &Error{Code: "USER_REFUSED"},
 			error:    true,
 		},
 		{
@@ -71,6 +112,29 @@ func Test_Authenticate(t *testing.T) {
 			},
 			param:    "PNOEE-30303039914",
 			expected: &models.Person{},
+			err:      &Error{Code: "TIMEOUT"},
+			error:    true,
+		},
+		{
+			name: "Error: result UNKNOWN",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "UNKNOWN"}}`))
+			},
+			param:    "PNOEE-30303039914",
+			expected: &models.Person{},
+			err:      errors.ErrUnsupportedResult,
+			error:    true,
+		},
+		{
+			name: "Error: state UNKNOWN",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte(`{"state": "UNKNOWN"}`))
+			},
+			param:    "PNOEE-30303039914",
+			expected: &models.Person{},
+			err:      errors.ErrUnsupportedState,
 			error:    true,
 		},
 		{
@@ -82,6 +146,19 @@ func Test_Authenticate(t *testing.T) {
 			},
 			param:    "PNOEE-30303039914",
 			expected: &models.Person{},
+			err:      errors.ErrSmartIdProviderError,
+			error:    true,
+		},
+		{
+			name: "Internal Server Error",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"title": "Internal Server Error", "status": 500}`))
+			},
+			param:    "PNOEE-30303039914",
+			expected: &models.Person{},
+			err:      errors.ErrSmartIdProviderError,
 			error:    true,
 		},
 	}
@@ -103,6 +180,7 @@ func Test_Authenticate(t *testing.T) {
 			if tt.error {
 				assert.Error(t, result.Err)
 				assert.Nil(t, result.Person)
+				assert.Equal(t, tt.err, result.Err)
 			} else {
 				assert.NotNil(t, session)
 				assert.NoError(t, result.Err)
@@ -164,6 +242,37 @@ func Test_Validate(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+		})
+	}
+}
+
+func Test_Error(t *testing.T) {
+	tests := []struct {
+		name     string
+		code     string
+		expected string
+	}{
+		{
+			name:     "Error: USER_REFUSED",
+			code:     "USER_REFUSED",
+			expected: "authentication failed: USER_REFUSED",
+		},
+		{
+			name:     "Error: USER_REFUSED_DISPLAYTEXTANDPIN",
+			code:     "USER_REFUSED_DISPLAYTEXTANDPIN",
+			expected: "authentication failed: USER_REFUSED_DISPLAYTEXTANDPIN",
+		},
+		{
+			name:     "Error: USER_REFUSED_VC_CHOICE",
+			code:     "USER_REFUSED_VC_CHOICE",
+			expected: "authentication failed: USER_REFUSED_VC_CHOICE",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := &Error{Code: tt.code}
+			assert.Equal(t, tt.expected, err.Error())
 		})
 	}
 }

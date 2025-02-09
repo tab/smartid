@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/tab/smartid/internal/config"
+	"github.com/tab/smartid/internal/errors"
 	"github.com/tab/smartid/internal/models"
 )
 
@@ -30,6 +31,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 		before   func(w http.ResponseWriter, r *http.Request)
 		identity string
 		expected *models.Session
+		err      error
 		error    bool
 	}{
 		{
@@ -44,17 +46,11 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 				Id:   "8fdb516d-1a82-43ba-b82d-be63df569b86",
 				Code: "1234",
 			},
+			err:   nil,
 			error: false,
 		},
 		{
-			name:     "Error",
-			before:   func(w http.ResponseWriter, r *http.Request) {},
-			identity: "not-a-personal-code",
-			expected: &models.Session{},
-			error:    true,
-		},
-		{
-			name: "Not found",
+			name: "Error: Not Found",
 			before: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusNotFound)
@@ -62,10 +58,11 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 			},
 			identity: "PNOEE-30303039914",
 			expected: &models.Session{},
+			err:      errors.ErrSmartIdProviderError,
 			error:    true,
 		},
 		{
-			name: "Bad Request",
+			name: "Error: Bad Request",
 			before: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
@@ -73,6 +70,18 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 			},
 			identity: "PNOEE-30303039914",
 			expected: &models.Session{},
+			err:      errors.ErrSmartIdProviderError,
+			error:    true,
+		},
+		{
+			name: "Error: InternalServerError",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			identity: "not-a-personal-code",
+			expected: &models.Session{},
+			err:      errors.ErrSmartIdProviderError,
 			error:    true,
 		},
 	}
@@ -88,6 +97,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 
 			if tt.error {
 				assert.Error(t, err)
+				assert.Equal(t, tt.err, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected.Id, response.Id)
@@ -116,6 +126,7 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 		before   func(w http.ResponseWriter, r *http.Request)
 		id       string
 		expected *models.AuthenticationResponse
+		err      error
 		error    bool
 	}{
 		{
@@ -157,6 +168,7 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 				},
 				InteractionFlowUsed: "displayTextAndPIN",
 			},
+			err:   nil,
 			error: false,
 		},
 		{
@@ -172,6 +184,7 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 					EndResult: "USER_REFUSED",
 				},
 			},
+			err:   nil,
 			error: false,
 		},
 		{
@@ -187,10 +200,11 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 					EndResult: "TIMEOUT",
 				},
 			},
+			err:   nil,
 			error: false,
 		},
 		{
-			name: "Not found",
+			name: "Error: Not found",
 			before: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusNotFound)
@@ -198,10 +212,11 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 			},
 			id:       id,
 			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdSessionNotFound,
 			error:    true,
 		},
 		{
-			name: "Bad Request",
+			name: "Error: Bad Request",
 			before: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
@@ -209,6 +224,18 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 			},
 			id:       id,
 			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdProviderError,
+			error:    true,
+		},
+		{
+			name: "Error: InternalServerError",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			id:       id,
+			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdProviderError,
 			error:    true,
 		},
 	}
@@ -224,6 +251,7 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 
 			if tt.error {
 				assert.Error(t, err)
+				assert.Equal(t, tt.err, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected.State, response.State)
