@@ -1,9 +1,12 @@
 package smartid
 
 import (
+	"context"
 	"time"
 
 	"github.com/tab/smartid/internal/config"
+	"github.com/tab/smartid/internal/errors"
+	"github.com/tab/smartid/internal/models"
 	"github.com/tab/smartid/internal/utils"
 )
 
@@ -13,6 +16,13 @@ const (
 	Timeout          = 60 * time.Second
 	URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
 )
+
+// Provider is the interface for the Smart-ID API client
+type Provider interface {
+	CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error)
+	FetchSession(ctx context.Context, sessionId string) (*models.Person, error)
+	Validate() error
+}
 
 // Client holds the client configuration and the HTTP client
 type Client struct {
@@ -80,4 +90,16 @@ func (c *Client) WithURL(url string) *Client {
 func (c *Client) WithTimeout(timeout time.Duration) *Client {
 	c.config.Timeout = timeout
 	return c
+}
+
+func (c *Client) Validate() error {
+	if c.config.RelyingPartyName == "" {
+		return errors.ErrMissingRelyingPartyName
+	}
+
+	if c.config.RelyingPartyUUID == "" {
+		return errors.ErrMissingRelyingPartyUUID
+	}
+
+	return nil
 }

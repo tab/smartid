@@ -25,12 +25,6 @@ const (
 	TIMEOUT                                         = "TIMEOUT"
 )
 
-// Result holds the authentication resultCh
-type Result struct {
-	Person *models.Person
-	Err    error
-}
-
 // Error represents an error from the Smart-ID provider
 type Error struct {
 	Code string
@@ -41,68 +35,48 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("authentication failed: %s", e.Code)
 }
 
-// Authenticate makes an authentication with the Smart-ID provider
-func (c *Client) Authenticate(
-	ctx context.Context,
-	nationalIdentityNumber string,
-) (*models.Session, <-chan Result) {
-	resultCh := make(chan Result, 1)
-
+// CreateSession creates authentication session with the Smart-ID provider
+func (c *Client) CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error) {
 	session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
 	if err != nil {
-		resultCh <- Result{nil, err}
-		return nil, resultCh
+		return nil, err
 	}
 
-	go func() {
-		response, err := requests.FetchAuthenticationSession(ctx, c.config, session.Id)
-		if err != nil {
-			resultCh <- Result{nil, err}
-			return
-		}
-
-		switch response.State {
-		case Running:
-			resultCh <- Result{nil, errors.ErrAuthenticationIsRunning}
-		case Complete:
-			switch response.Result.EndResult {
-			case OK:
-				person, err := utils.Extract(response.Cert.Value)
-				if err != nil {
-					resultCh <- Result{nil, err}
-					return
-				}
-
-				resultCh <- Result{person, nil}
-			case USER_REFUSED,
-				USER_REFUSED_DISPLAYTEXTANDPIN,
-				USER_REFUSED_VC_CHOICE,
-				USER_REFUSED_CONFIRMATIONMESSAGE,
-				USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE,
-				USER_REFUSED_CERT_CHOICE,
-				WRONG_VC,
-				TIMEOUT:
-
-				resultCh <- Result{nil, &Error{Code: response.Result.EndResult}}
-			default:
-				resultCh <- Result{nil, errors.ErrUnsupportedResult}
-			}
-		default:
-			resultCh <- Result{nil, errors.ErrUnsupportedState}
-		}
-	}()
-
-	return session, resultCh
+	return session, nil
 }
 
-func (c *Client) Validate() error {
-	if c.config.RelyingPartyName == "" {
-		return errors.ErrMissingRelyingPartyName
+// FetchSession fetches the authentication session from the Smart-ID provider
+func (c *Client) FetchSession(ctx context.Context, sessionId string) (*models.Person, error) {
+	response, err := requests.FetchAuthenticationSession(ctx, c.config, sessionId)
+	if err != nil {
+		return nil, err
 	}
 
-	if c.config.RelyingPartyUUID == "" {
-		return errors.ErrMissingRelyingPartyUUID
+	switch response.State {
+	case Running:
+		return nil, errors.ErrAuthenticationIsRunning
+	case Complete:
+		switch response.Result.EndResult {
+		case OK:
+			person, err := utils.Extract(response.Cert.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			return person, nil
+		case USER_REFUSED,
+			USER_REFUSED_DISPLAYTEXTANDPIN,
+			USER_REFUSED_VC_CHOICE,
+			USER_REFUSED_CONFIRMATIONMESSAGE,
+			USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE,
+			USER_REFUSED_CERT_CHOICE,
+			WRONG_VC,
+			TIMEOUT:
+			return nil, &Error{Code: response.Result.EndResult}
+		}
+	default:
+		return nil, errors.ErrUnsupportedState
 	}
 
-	return nil
+	return nil, errors.ErrUnsupportedResult
 }

@@ -12,16 +12,87 @@ import (
 	"github.com/tab/smartid/internal/models"
 )
 
-func Test_Authenticate(t *testing.T) {
+func Test_CreateSession(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
 		name     string
 		before   func(w http.ResponseWriter, r *http.Request)
-		param    string
-		expected *models.Person
+		identity string
+		expected *models.Session
 		err      error
-		error    bool
+	}{
+		{
+			name: "Success",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: &models.Session{
+				Id:   "8fdb516d-1a82-43ba-b82d-be63df569b86",
+				Code: "1234",
+			},
+			err: nil,
+		},
+		{
+			name: "Bad Request",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(`{"title": "Bad Request", "status": 400}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: nil,
+			err:      errors.ErrSmartIdProviderError,
+		},
+		{
+			name: "Internal Server Error",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"title": "Internal Server Error", "status": 500}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: nil,
+			err:      errors.ErrSmartIdProviderError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testServer := httptest.NewServer(http.HandlerFunc(tt.before))
+			defer testServer.Close()
+
+			client := NewClient()
+			client.WithRelyingPartyName("DEMO").
+				WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
+				WithURL(testServer.URL)
+
+			session, err := client.CreateSession(ctx, tt.identity)
+
+			if tt.err != nil {
+				assert.Error(t, err)
+				assert.Nil(t, session)
+			} else {
+				assert.NotNil(t, session)
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func Test_FetchSession(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name      string
+		before    func(w http.ResponseWriter, r *http.Request)
+		sessionId string
+		expected  *models.Person
+		err       error
+		error     bool
 	}{
 		{
 			name: "Success",
@@ -45,7 +116,7 @@ func Test_Authenticate(t *testing.T) {
 	"interactionFlowUsed": "displayTextAndPIN"
 }`))
 			},
-			param: "PNOEE-30303039914",
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
 			expected: &models.Person{
 				IdentityNumber: "PNOEE-30303039914",
 				PersonalCode:   "30303039914",
@@ -77,10 +148,10 @@ func Test_Authenticate(t *testing.T) {
 	"interactionFlowUsed": "displayTextAndPIN"
 }`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      errors.ErrFailedToDecodeCertificate,
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       errors.ErrFailedToDecodeCertificate,
+			error:     true,
 		},
 		{
 			name: "Error: Authentication is running",
@@ -88,10 +159,10 @@ func Test_Authenticate(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "RUNNING"}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      errors.ErrAuthenticationIsRunning,
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       errors.ErrAuthenticationIsRunning,
+			error:     true,
 		},
 		{
 			name: "Error: USER_REFUSED",
@@ -99,10 +170,10 @@ func Test_Authenticate(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "USER_REFUSED"}}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      &Error{Code: "USER_REFUSED"},
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       &Error{Code: "USER_REFUSED"},
+			error:     true,
 		},
 		{
 			name: "Error: TIMEOUT",
@@ -110,10 +181,10 @@ func Test_Authenticate(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "TIMEOUT"}}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      &Error{Code: "TIMEOUT"},
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       &Error{Code: "TIMEOUT"},
+			error:     true,
 		},
 		{
 			name: "Error: result UNKNOWN",
@@ -121,10 +192,10 @@ func Test_Authenticate(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "UNKNOWN"}}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      errors.ErrUnsupportedResult,
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       errors.ErrUnsupportedResult,
+			error:     true,
 		},
 		{
 			name: "Error: state UNKNOWN",
@@ -132,10 +203,10 @@ func Test_Authenticate(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte(`{"state": "UNKNOWN"}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      errors.ErrUnsupportedState,
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       errors.ErrUnsupportedState,
+			error:     true,
 		},
 		{
 			name: "Bad Request",
@@ -144,10 +215,10 @@ func Test_Authenticate(t *testing.T) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"title": "Bad Request", "status": 400}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      errors.ErrSmartIdProviderError,
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       errors.ErrSmartIdProviderError,
+			error:     true,
 		},
 		{
 			name: "Internal Server Error",
@@ -156,10 +227,10 @@ func Test_Authenticate(t *testing.T) {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(`{"title": "Internal Server Error", "status": 500}`))
 			},
-			param:    "PNOEE-30303039914",
-			expected: &models.Person{},
-			err:      errors.ErrSmartIdProviderError,
-			error:    true,
+			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
+			expected:  &models.Person{},
+			err:       errors.ErrSmartIdProviderError,
+			error:     true,
 		},
 	}
 
@@ -173,18 +244,15 @@ func Test_Authenticate(t *testing.T) {
 				WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
 				WithURL(testServer.URL)
 
-			session, resultCh := client.Authenticate(ctx, tt.param)
-
-			result := <-resultCh
+			session, err := client.FetchSession(ctx, tt.sessionId)
 
 			if tt.error {
-				assert.Error(t, result.Err)
-				assert.Nil(t, result.Person)
-				assert.Equal(t, tt.err, result.Err)
+				assert.Error(t, err)
+				assert.Nil(t, session)
 			} else {
 				assert.NotNil(t, session)
-				assert.NoError(t, result.Err)
-				assert.Equal(t, tt.expected, result.Person)
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, session)
 			}
 		})
 	}

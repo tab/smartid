@@ -1,4 +1,7 @@
-package main
+//go:build example
+// +build example
+
+package examples
 
 import (
 	"context"
@@ -10,7 +13,53 @@ import (
 	"github.com/tab/smartid/internal/config"
 )
 
-func main() {
+func Example_CreateSession() {
+	client := smartid.NewClient().
+		WithRelyingPartyName("DEMO").
+		WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
+		WithCertificateLevel("QUALIFIED").
+		WithHashType("SHA512").
+		WithInteractionType("displayTextAndPIN").
+		WithText("Enter PIN1").
+		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
+		WithTimeout(60 * time.Second)
+
+	ctx := context.Background()
+
+	identity := smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914")
+
+	session, err := client.CreateSession(ctx, identity)
+	if err != nil {
+		fmt.Println("Error creating session:", err)
+	}
+	fmt.Println("Session created:", session)
+}
+
+func Example_FetchSession() {
+	client := smartid.NewClient().
+		WithRelyingPartyName("DEMO").
+		WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
+		WithCertificateLevel("QUALIFIED").
+		WithHashType("SHA512").
+		WithInteractionType("displayTextAndPIN").
+		WithText("Enter PIN1").
+		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
+		WithTimeout(60 * time.Second)
+
+	ctx := context.Background()
+
+	sessionId := "d3b8f7c3-7e0c-4a4e-9e6b-4b0e6b8e4f4c"
+
+	person, err := client.FetchSession(ctx, sessionId)
+	if err != nil {
+		fmt.Println("Error fetching session:", err)
+		return
+	}
+
+	fmt.Println("Person:", person)
+}
+
+func Example_ProcessMultipleIdentitiesInBackground() {
 	client := smartid.NewClient().
 		WithRelyingPartyName("DEMO").
 		WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
