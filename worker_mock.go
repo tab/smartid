@@ -56,15 +56,15 @@ func (mr *MockBackgroundWorkerMockRecorder) Process(ctx, sessionId any) *gomock.
 }
 
 // Start mocks base method.
-func (m *MockBackgroundWorker) Start() {
+func (m *MockBackgroundWorker) Start(ctx context.Context) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Start")
+	m.ctrl.Call(m, "Start", ctx)
 }
 
 // Start indicates an expected call of Start.
-func (mr *MockBackgroundWorkerMockRecorder) Start() *gomock.Call {
+func (mr *MockBackgroundWorkerMockRecorder) Start(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockBackgroundWorker)(nil).Start))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockBackgroundWorker)(nil).Start), ctx)
 }
 
 // Stop mocks base method.

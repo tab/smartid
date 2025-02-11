@@ -33,15 +33,15 @@ func main() {
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039983"),
 	}
 
-	ctx := context.Background()
-
-	worker := smartid.NewWorker(ctx, client)
+	worker := smartid.NewWorker(client)
 	worker.WithConfig(config.WorkerConfig{
 		Concurrency: 50,
 		QueueSize:   100,
 	})
 
-	worker.Start()
+	ctx := context.Background()
+
+	worker.Start(ctx)
 	defer worker.Stop()
 
 	var wg sync.WaitGroup
