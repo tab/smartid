@@ -15,7 +15,7 @@ func Test_NewWorker(t *testing.T) {
 	ctx := context.Background()
 	client := NewClient()
 
-	worker := NewWorker(ctx, client)
+	w := NewWorker(ctx, client)
 
 	tests := []struct {
 		name     string
@@ -25,7 +25,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				worker.WithConfig(config.WorkerConfig{
+				w.WithConfig(config.WorkerConfig{
 					Concurrency: 3,
 					QueueSize:   15,
 				})
@@ -40,7 +40,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Default values",
 			before: func() {
-				worker.WithConfig(config.WorkerConfig{})
+				w.WithConfig(config.WorkerConfig{})
 			},
 			expected: &Worker{
 				ctx:         ctx,
@@ -52,7 +52,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Zero values",
 			before: func() {
-				worker.WithConfig(config.WorkerConfig{
+				w.WithConfig(config.WorkerConfig{
 					Concurrency: 0,
 					QueueSize:   0,
 				})
@@ -67,7 +67,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Without concurrency option",
 			before: func() {
-				worker.WithConfig(config.WorkerConfig{
+				w.WithConfig(config.WorkerConfig{
 					QueueSize: 500,
 				})
 			},
@@ -81,7 +81,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Without queue size option",
 			before: func() {
-				worker.WithConfig(config.WorkerConfig{
+				w.WithConfig(config.WorkerConfig{
 					Concurrency: 25,
 				})
 			},
@@ -98,8 +98,8 @@ func Test_NewWorker(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			assert.Equal(t, tt.expected.concurrency, worker.concurrency)
-			assert.Equal(t, cap(tt.expected.queue), cap(worker.queue))
+			assert.Equal(t, tt.expected.concurrency, w.concurrency)
+			assert.Equal(t, cap(tt.expected.queue), cap(w.queue))
 		})
 	}
 }
@@ -130,7 +130,7 @@ func Test_Worker_Start(t *testing.T) {
 
 func Test_Worker_Stop(t *testing.T) {
 	client := NewClient()
-	worker := NewWorker(context.Background(), client).WithConfig(config.WorkerConfig{
+	w := NewWorker(context.Background(), client).WithConfig(config.WorkerConfig{
 		Concurrency: 3,
 		QueueSize:   15,
 	})
@@ -144,9 +144,9 @@ func Test_Worker_Stop(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			worker.Start()
-			worker.Stop()
-			assert.Nil(t, worker.queue)
+			w.Start()
+			w.Stop()
+			assert.Nil(t, w.queue)
 		})
 	}
 }
@@ -157,13 +157,13 @@ func Test_Worker_Process(t *testing.T) {
 
 	ctx := context.Background()
 	client := NewMockProvider(ctrl)
-	worker := NewWorker(ctx, client).WithConfig(config.WorkerConfig{
+	w := NewWorker(ctx, client).WithConfig(config.WorkerConfig{
 		Concurrency: 3,
 		QueueSize:   15,
 	})
 
-	worker.Start()
-	defer worker.Stop()
+	w.Start()
+	defer w.Stop()
 
 	tests := []struct {
 		name      string
@@ -210,7 +210,7 @@ func Test_Worker_Process(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			resultCh := worker.Process(tt.sessionId)
+			resultCh := w.Process(ctx, tt.sessionId)
 			assert.NotNil(t, resultCh)
 
 			result := <-resultCh

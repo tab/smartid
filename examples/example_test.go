@@ -70,8 +70,6 @@ func Example_ProcessMultipleIdentitiesInBackground() {
 		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 		WithTimeout(60 * time.Second)
 
-	ctx := context.Background()
-
 	identities := []string{
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914"),
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039917"),
@@ -83,6 +81,8 @@ func Example_ProcessMultipleIdentitiesInBackground() {
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039972"),
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039983"),
 	}
+
+	ctx := context.Background()
 
 	worker := smartid.NewWorker(ctx, client)
 	worker.WithConfig(config.WorkerConfig{
@@ -106,7 +106,7 @@ func Example_ProcessMultipleIdentitiesInBackground() {
 		}
 		fmt.Println("Session created:", session)
 
-		resultCh := worker.Process(session.Id)
+		resultCh := worker.Process(ctx, session.Id)
 		go func() {
 			defer wg.Done()
 			result := <-resultCh
