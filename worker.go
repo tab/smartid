@@ -24,23 +24,21 @@ type Job struct {
 }
 
 type BackgroundWorker interface {
-	Start()
+	Start(ctx context.Context)
 	Stop()
 	Process(ctx context.Context, sessionId string) <-chan Result
 	WithConfig(cfg config.WorkerConfig) *Worker
 }
 
 type Worker struct {
-	ctx         context.Context
 	provider    Provider
 	queue       chan Job
 	concurrency int
 	wg          sync.WaitGroup
 }
 
-func NewWorker(ctx context.Context, provider Provider) *Worker {
+func NewWorker(provider Provider) *Worker {
 	return &Worker{
-		ctx:         ctx,
 		provider:    provider,
 		queue:       make(chan Job, QueueSize),
 		concurrency: Concurrency,
@@ -62,10 +60,10 @@ func (w *Worker) WithConfig(cfg config.WorkerConfig) *Worker {
 	return w
 }
 
-func (w *Worker) Start() {
+func (w *Worker) Start(ctx context.Context) {
 	for i := 0; i < w.concurrency; i++ {
 		w.wg.Add(1)
-		go w.perform()
+		go w.perform(ctx)
 	}
 }
 
@@ -88,7 +86,7 @@ func (w *Worker) Process(ctx context.Context, sessionId string) <-chan Result {
 	return resultCh
 }
 
-func (w *Worker) perform() {
+func (w *Worker) perform(ctx context.Context) {
 	defer w.wg.Done()
 
 	for {
@@ -98,10 +96,10 @@ func (w *Worker) perform() {
 				return
 			}
 
-			person, err := w.provider.FetchSession(w.ctx, j.sessionId)
+			person, err := w.provider.FetchSession(ctx, j.sessionId)
 			j.resultCh <- Result{Person: person, Err: err}
 			close(j.resultCh)
-		case <-w.ctx.Done():
+		case <-ctx.Done():
 			return
 		}
 	}
