@@ -57,10 +57,10 @@ func (mr *MockProviderMockRecorder) CreateSession(ctx, nationalIdentityNumber an
 }
 
 // FetchSession mocks base method.
-func (m *MockProvider) FetchSession(ctx context.Context, sessionId string) (*models.Person, error) {
+func (m *MockProvider) FetchSession(ctx context.Context, sessionId string) (*Person, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FetchSession", ctx, sessionId)
-	ret0, _ := ret[0].(*models.Person)
+	ret0, _ := ret[0].(*Person)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

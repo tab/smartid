@@ -90,7 +90,7 @@ func Test_FetchSession(t *testing.T) {
 		name      string
 		before    func(w http.ResponseWriter, r *http.Request)
 		sessionId string
-		expected  *models.Person
+		expected  *Person
 		err       error
 		error     bool
 	}{
@@ -117,7 +117,7 @@ func Test_FetchSession(t *testing.T) {
 }`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected: &models.Person{
+			expected: &Person{
 				IdentityNumber: "PNOEE-30303039914",
 				PersonalCode:   "30303039914",
 				FirstName:      "TESTNUMBER",
@@ -149,7 +149,7 @@ func Test_FetchSession(t *testing.T) {
 }`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       errors.ErrFailedToDecodeCertificate,
 			error:     true,
 		},
@@ -160,7 +160,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"state": "RUNNING"}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       errors.ErrAuthenticationIsRunning,
 			error:     true,
 		},
@@ -171,7 +171,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "USER_REFUSED"}}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       &Error{Code: "USER_REFUSED"},
 			error:     true,
 		},
@@ -182,7 +182,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "TIMEOUT"}}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       &Error{Code: "TIMEOUT"},
 			error:     true,
 		},
@@ -193,7 +193,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"state": "COMPLETE", "result": {"endResult": "UNKNOWN"}}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       errors.ErrUnsupportedResult,
 			error:     true,
 		},
@@ -204,7 +204,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"state": "UNKNOWN"}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       errors.ErrUnsupportedState,
 			error:     true,
 		},
@@ -216,7 +216,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"title": "Bad Request", "status": 400}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       errors.ErrSmartIdProviderError,
 			error:     true,
 		},
@@ -228,7 +228,7 @@ func Test_FetchSession(t *testing.T) {
 				w.Write([]byte(`{"title": "Internal Server Error", "status": 500}`))
 			},
 			sessionId: "eb03076a-9f97-423e-af2e-b14c0a481ff9",
-			expected:  &models.Person{},
+			expected:  &Person{},
 			err:       errors.ErrSmartIdProviderError,
 			error:     true,
 		},

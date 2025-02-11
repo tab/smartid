@@ -20,7 +20,7 @@ const (
 // Provider is the interface for the Smart-ID API client
 type Provider interface {
 	CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error)
-	FetchSession(ctx context.Context, sessionId string) (*models.Person, error)
+	FetchSession(ctx context.Context, sessionId string) (*Person, error)
 	Validate() error
 }
 

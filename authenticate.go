@@ -46,7 +46,7 @@ func (c *Client) CreateSession(ctx context.Context, nationalIdentityNumber strin
 }
 
 // FetchSession fetches the authentication session from the Smart-ID provider
-func (c *Client) FetchSession(ctx context.Context, sessionId string) (*models.Person, error) {
+func (c *Client) FetchSession(ctx context.Context, sessionId string) (*Person, error) {
 	response, err := requests.FetchAuthenticationSession(ctx, c.config, sessionId)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,12 @@ func (c *Client) FetchSession(ctx context.Context, sessionId string) (*models.Pe
 				return nil, err
 			}
 
-			return person, nil
+			return &Person{
+				IdentityNumber: person.IdentityNumber,
+				PersonalCode:   person.PersonalCode,
+				FirstName:      person.FirstName,
+				LastName:       person.LastName,
+			}, nil
 		case USER_REFUSED,
 			USER_REFUSED_DISPLAYTEXTANDPIN,
 			USER_REFUSED_VC_CHOICE,

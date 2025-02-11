@@ -7,14 +7,20 @@ import (
 	"strings"
 
 	"github.com/tab/smartid/internal/errors"
-	"github.com/tab/smartid/internal/models"
 )
 
 var (
 	identityRegex = regexp.MustCompile(`^(PAS|IDC|PNO)([A-Z]{2})-([A-Za-z0-9]+)$`)
 )
 
-func Extract(encodedCert string) (*models.Person, error) {
+type Person struct {
+	IdentityNumber string
+	PersonalCode   string
+	FirstName      string
+	LastName       string
+}
+
+func Extract(encodedCert string) (*Person, error) {
 	certBytes, err := base64.StdEncoding.DecodeString(encodedCert)
 	if err != nil {
 		return nil, errors.ErrFailedToDecodeCertificate
@@ -37,7 +43,7 @@ func Extract(encodedCert string) (*models.Person, error) {
 	firstName := strings.TrimSpace(parts[0])
 	lastName := strings.TrimSpace(parts[1])
 
-	return &models.Person{
+	return &Person{
 		IdentityNumber: cert.Subject.SerialNumber,
 		PersonalCode:   identity.ID,
 		FirstName:      firstName,
