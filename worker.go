@@ -19,8 +19,16 @@ type Result struct {
 }
 
 type Job struct {
+	ctx       context.Context
 	sessionId string
 	resultCh  chan Result
+}
+
+type BackgroundWorker interface {
+	Start()
+	Stop()
+	Process(ctx context.Context, sessionId string) <-chan Result
+	WithConfig(cfg config.WorkerConfig) Worker
 }
 
 type Worker struct {
@@ -68,14 +76,14 @@ func (w *Worker) Stop() {
 	w.queue = nil
 }
 
-func (w *Worker) Process(sessionId string) <-chan Result {
+func (w *Worker) Process(ctx context.Context, sessionId string) <-chan Result {
 	resultCh := make(chan Result, 1)
 
 	select {
-	case <-w.ctx.Done():
-		resultCh <- Result{Err: w.ctx.Err()}
+	case <-ctx.Done():
+		resultCh <- Result{Err: ctx.Err()}
 		close(resultCh)
-	case w.queue <- Job{sessionId: sessionId, resultCh: resultCh}:
+	case w.queue <- Job{ctx: ctx, sessionId: sessionId, resultCh: resultCh}:
 	}
 
 	return resultCh
