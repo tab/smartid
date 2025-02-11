@@ -24,7 +24,7 @@ jobs:
           version: v1.60
 
   static-check:
-    name: Static check
+    name: Staticcheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +34,8 @@ jobs:
       - name: staticcheck
         # NOTE: https://github.com/dominikh/staticcheck-action/releases/tag/v1.3.1
         uses: dominikh/staticcheck-action@fe1dd0c3658873b46f8c9bb3291096a617310ca6
+        with:
+          install-go: false
 
   tests:
     name: Tests

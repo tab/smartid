@@ -8,7 +8,6 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/tab/smartid/internal/config"
-	"github.com/tab/smartid/internal/models"
 )
 
 func Test_NewWorker(t *testing.T) {
@@ -169,7 +168,7 @@ func Test_Worker_Process(t *testing.T) {
 		name      string
 		sessionId string
 		before    func()
-		expect    *models.Person
+		expect    *Person
 		error     error
 	}{
 		{
@@ -178,14 +177,14 @@ func Test_Worker_Process(t *testing.T) {
 			before: func() {
 				client.EXPECT().
 					FetchSession(ctx, "c2731f5e-9d63-4db7-b83c-db528d2f7021").
-					Return(&models.Person{
+					Return(&Person{
 						IdentityNumber: "PNOEE-30303039914",
 						PersonalCode:   "30303039914",
 						FirstName:      "TESTNUMBER",
 						LastName:       "OK",
 					}, nil)
 			},
-			expect: &models.Person{
+			expect: &Person{
 				IdentityNumber: "PNOEE-30303039914",
 				PersonalCode:   "30303039914",
 				FirstName:      "TESTNUMBER",

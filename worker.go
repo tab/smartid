@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/tab/smartid/internal/config"
-	"github.com/tab/smartid/internal/models"
 )
 
 const (
@@ -14,7 +13,7 @@ const (
 )
 
 type Result struct {
-	Person *models.Person
+	Person *Person
 	Err    error
 }
 
@@ -28,7 +27,7 @@ type BackgroundWorker interface {
 	Start()
 	Stop()
 	Process(ctx context.Context, sessionId string) <-chan Result
-	WithConfig(cfg config.WorkerConfig) Worker
+	WithConfig(cfg config.WorkerConfig) *Worker
 }
 
 type Worker struct {

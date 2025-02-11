@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/tab/smartid/internal/models"
 )
 
 func Test_Certificate_Extract(t *testing.T) {
@@ -14,13 +12,13 @@ func Test_Certificate_Extract(t *testing.T) {
 	tests := []struct {
 		name     string
 		value    string
-		expected *models.Person
+		expected *Person
 		error    bool
 	}{
 		{
 			name:  "Success",
 			value: value,
-			expected: &models.Person{
+			expected: &Person{
 				IdentityNumber: "PNOEE-30303039914",
 				PersonalCode:   "30303039914",
 				FirstName:      "TESTNUMBER",

@@ -80,10 +80,10 @@ func (mr *MockBackgroundWorkerMockRecorder) Stop() *gomock.Call {
 }
 
 // WithConfig mocks base method.
-func (m *MockBackgroundWorker) WithConfig(cfg config.WorkerConfig) Worker {
+func (m *MockBackgroundWorker) WithConfig(cfg config.WorkerConfig) *Worker {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithConfig", cfg)
-	ret0, _ := ret[0].(Worker)
+	ret0, _ := ret[0].(*Worker)
 	return ret0
 }
 
