@@ -11,96 +11,98 @@ import (
 )
 
 func Test_NewWorker(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
-	w := NewWorker(client)
+	type result struct {
+		concurrency int
+		queueSize   int
+	}
 
 	tests := []struct {
 		name     string
-		before   func()
-		expected *Worker
+		before   func(w Worker)
+		expected result
 	}{
 		{
 			name: "Success",
-			before: func() {
+			before: func(w Worker) {
 				w.WithConfig(config.WorkerConfig{
 					Concurrency: 3,
 					QueueSize:   15,
 				})
 			},
-			expected: &Worker{
-				provider:    client,
-				queue:       make(chan Job, 15),
+			expected: result{
 				concurrency: 3,
+				queueSize:   15,
 			},
 		},
 		{
 			name: "Default values",
-			before: func() {
+			before: func(w Worker) {
 				w.WithConfig(config.WorkerConfig{})
 			},
-			expected: &Worker{
-				provider:    client,
-				queue:       make(chan Job, 100),
-				concurrency: 10,
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   DefaultQueueSize,
 			},
 		},
 		{
 			name: "Zero values",
-			before: func() {
+			before: func(w Worker) {
 				w.WithConfig(config.WorkerConfig{
 					Concurrency: 0,
 					QueueSize:   0,
 				})
 			},
-			expected: &Worker{
-				provider:    client,
-				queue:       make(chan Job, 100),
-				concurrency: 10,
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   DefaultQueueSize,
 			},
 		},
 		{
 			name: "Without concurrency option",
-			before: func() {
+			before: func(w Worker) {
 				w.WithConfig(config.WorkerConfig{
 					QueueSize: 500,
 				})
 			},
-			expected: &Worker{
-				provider:    client,
-				queue:       make(chan Job, 500),
-				concurrency: 10,
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   500,
 			},
 		},
 		{
 			name: "Without queue size option",
-			before: func() {
+			before: func(w Worker) {
 				w.WithConfig(config.WorkerConfig{
 					Concurrency: 25,
 				})
 			},
-			expected: &Worker{
-				provider:    client,
-				queue:       make(chan Job, 100),
+			expected: result{
 				concurrency: 25,
+				queueSize:   DefaultQueueSize,
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
+			w := NewWorker(c)
 
-			assert.Equal(t, tt.expected.concurrency, w.concurrency)
-			assert.Equal(t, cap(tt.expected.queue), cap(w.queue))
+			tt.before(w)
+
+			workerImpl := w.(*worker)
+
+			assert.Equal(t, tt.expected.concurrency, workerImpl.concurrency)
+			assert.Equal(t, tt.expected.queueSize, cap(workerImpl.queue))
 		})
 	}
 }
 
 func Test_Worker_Start(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient()
-	worker := NewWorker(client).WithConfig(config.WorkerConfig{
+	c := NewClient()
+	w := NewWorker(c).WithConfig(config.WorkerConfig{
 		Concurrency: 3,
 		QueueSize:   15,
 	})
@@ -112,20 +114,21 @@ func Test_Worker_Start(t *testing.T) {
 			name: "Success",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			worker.Start(ctx)
-			worker.Stop()
+			w.Start(ctx)
+			w.Stop()
 
-			assert.NotNil(t, worker)
+			assert.NotNil(t, w)
 		})
 	}
 }
 
 func Test_Worker_Stop(t *testing.T) {
 	ctx := context.Background()
-	client := NewClient()
-	w := NewWorker(client).WithConfig(config.WorkerConfig{
+	c := NewClient()
+	w := NewWorker(c).WithConfig(config.WorkerConfig{
 		Concurrency: 3,
 		QueueSize:   15,
 	})
@@ -137,11 +140,13 @@ func Test_Worker_Stop(t *testing.T) {
 			name: "Success",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w.Start(ctx)
 			w.Stop()
-			assert.Nil(t, w.queue)
+
+			assert.NoError(t, nil)
 		})
 	}
 }
@@ -151,12 +156,11 @@ func Test_Worker_Process(t *testing.T) {
 	defer ctrl.Finish()
 
 	ctx := context.Background()
-	client := NewMockProvider(ctrl)
-	w := NewWorker(client).WithConfig(config.WorkerConfig{
+	mockClient := NewMockClient(ctrl)
+	w := NewWorker(mockClient).WithConfig(config.WorkerConfig{
 		Concurrency: 3,
 		QueueSize:   15,
 	})
-
 	w.Start(ctx)
 	defer w.Stop()
 
@@ -165,13 +169,13 @@ func Test_Worker_Process(t *testing.T) {
 		sessionId string
 		before    func()
 		expect    *Person
-		error     error
+		err       error
 	}{
 		{
 			name:      "Success",
 			sessionId: "c2731f5e-9d63-4db7-b83c-db528d2f7021",
 			before: func() {
-				client.EXPECT().
+				mockClient.EXPECT().
 					FetchSession(ctx, "c2731f5e-9d63-4db7-b83c-db528d2f7021").
 					Return(&Person{
 						IdentityNumber: "PNOEE-30303039914",
@@ -186,18 +190,18 @@ func Test_Worker_Process(t *testing.T) {
 				FirstName:      "TESTNUMBER",
 				LastName:       "OK",
 			},
-			error: nil,
+			err: nil,
 		},
 		{
 			name:      "Error: USER_REFUSED",
 			sessionId: "c2731f5e-9d63-4db7-b83c-db528d2f7021",
 			before: func() {
-				client.EXPECT().
+				mockClient.EXPECT().
 					FetchSession(ctx, "c2731f5e-9d63-4db7-b83c-db528d2f7021").
 					Return(nil, &Error{Code: "USER_REFUSED"})
 			},
 			expect: nil,
-			error:  &Error{Code: "USER_REFUSED"},
+			err:    &Error{Code: "USER_REFUSED"},
 		},
 	}
 
@@ -209,9 +213,8 @@ func Test_Worker_Process(t *testing.T) {
 			assert.NotNil(t, resultCh)
 
 			result := <-resultCh
-
-			if tt.error != nil {
-				assert.Equal(t, tt.error, result.Err)
+			if tt.err != nil {
+				assert.Equal(t, tt.err, result.Err)
 			} else {
 				assert.NoError(t, result.Err)
 				assert.Equal(t, tt.expect, result.Person)

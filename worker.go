@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	Concurrency = 10
-	QueueSize   = 100
+	DefaultConcurrency = 10
+	DefaultQueueSize   = 100
 )
 
 type Result struct {
@@ -18,40 +18,39 @@ type Result struct {
 }
 
 type Job struct {
-	ctx       context.Context
 	sessionId string
 	resultCh  chan Result
 }
 
-type BackgroundWorker interface {
+type Worker interface {
 	Start(ctx context.Context)
 	Stop()
 	Process(ctx context.Context, sessionId string) <-chan Result
-	WithConfig(cfg config.WorkerConfig) *Worker
+	WithConfig(cfg config.WorkerConfig) Worker
 }
 
-type Worker struct {
-	provider    Provider
+type worker struct {
+	client      Client
 	queue       chan Job
 	concurrency int
 	wg          sync.WaitGroup
 }
 
-func NewWorker(provider Provider) *Worker {
-	return &Worker{
-		provider:    provider,
-		queue:       make(chan Job, QueueSize),
-		concurrency: Concurrency,
+func NewWorker(client Client) Worker {
+	return &worker{
+		client:      client,
+		queue:       make(chan Job, DefaultQueueSize),
+		concurrency: DefaultConcurrency,
 	}
 }
 
-func (w *Worker) WithConfig(cfg config.WorkerConfig) *Worker {
+func (w *worker) WithConfig(cfg config.WorkerConfig) Worker {
 	if cfg.Concurrency == 0 {
-		cfg.Concurrency = Concurrency
+		cfg.Concurrency = DefaultConcurrency
 	}
 
 	if cfg.QueueSize == 0 {
-		cfg.QueueSize = QueueSize
+		cfg.QueueSize = DefaultQueueSize
 	}
 
 	w.concurrency = cfg.Concurrency
@@ -60,33 +59,32 @@ func (w *Worker) WithConfig(cfg config.WorkerConfig) *Worker {
 	return w
 }
 
-func (w *Worker) Start(ctx context.Context) {
+func (w *worker) Start(ctx context.Context) {
 	for i := 0; i < w.concurrency; i++ {
 		w.wg.Add(1)
 		go w.perform(ctx)
 	}
 }
 
-func (w *Worker) Stop() {
+func (w *worker) Stop() {
 	close(w.queue)
 	w.wg.Wait()
-	w.queue = nil
 }
 
-func (w *Worker) Process(ctx context.Context, sessionId string) <-chan Result {
+func (w *worker) Process(ctx context.Context, sessionId string) <-chan Result {
 	resultCh := make(chan Result, 1)
 
 	select {
 	case <-ctx.Done():
 		resultCh <- Result{Err: ctx.Err()}
 		close(resultCh)
-	case w.queue <- Job{ctx: ctx, sessionId: sessionId, resultCh: resultCh}:
+	case w.queue <- Job{sessionId: sessionId, resultCh: resultCh}:
 	}
 
 	return resultCh
 }
 
-func (w *Worker) perform(ctx context.Context) {
+func (w *worker) perform(ctx context.Context) {
 	defer w.wg.Done()
 
 	for {
@@ -96,8 +94,9 @@ func (w *Worker) perform(ctx context.Context) {
 				return
 			}
 
-			person, err := w.provider.FetchSession(ctx, j.sessionId)
+			person, err := w.client.FetchSession(ctx, j.sessionId)
 			j.resultCh <- Result{Person: person, Err: err}
+
 			close(j.resultCh)
 		case <-ctx.Done():
 			return

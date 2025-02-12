@@ -17,32 +17,32 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockBackgroundWorker is a mock of BackgroundWorker interface.
-type MockBackgroundWorker struct {
+// MockWorker is a mock of Worker interface.
+type MockWorker struct {
 	ctrl     *gomock.Controller
-	recorder *MockBackgroundWorkerMockRecorder
+	recorder *MockWorkerMockRecorder
 	isgomock struct{}
 }
 
-// MockBackgroundWorkerMockRecorder is the mock recorder for MockBackgroundWorker.
-type MockBackgroundWorkerMockRecorder struct {
-	mock *MockBackgroundWorker
+// MockWorkerMockRecorder is the mock recorder for MockWorker.
+type MockWorkerMockRecorder struct {
+	mock *MockWorker
 }
 
-// NewMockBackgroundWorker creates a new mock instance.
-func NewMockBackgroundWorker(ctrl *gomock.Controller) *MockBackgroundWorker {
-	mock := &MockBackgroundWorker{ctrl: ctrl}
-	mock.recorder = &MockBackgroundWorkerMockRecorder{mock}
+// NewMockWorker creates a new mock instance.
+func NewMockWorker(ctrl *gomock.Controller) *MockWorker {
+	mock := &MockWorker{ctrl: ctrl}
+	mock.recorder = &MockWorkerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockBackgroundWorker) EXPECT() *MockBackgroundWorkerMockRecorder {
+func (m *MockWorker) EXPECT() *MockWorkerMockRecorder {
 	return m.recorder
 }
 
 // Process mocks base method.
-func (m *MockBackgroundWorker) Process(ctx context.Context, sessionId string) <-chan Result {
+func (m *MockWorker) Process(ctx context.Context, sessionId string) <-chan Result {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, sessionId)
 	ret0, _ := ret[0].(<-chan Result)
@@ -50,45 +50,45 @@ func (m *MockBackgroundWorker) Process(ctx context.Context, sessionId string) <-
 }
 
 // Process indicates an expected call of Process.
-func (mr *MockBackgroundWorkerMockRecorder) Process(ctx, sessionId any) *gomock.Call {
+func (mr *MockWorkerMockRecorder) Process(ctx, sessionId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockBackgroundWorker)(nil).Process), ctx, sessionId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockWorker)(nil).Process), ctx, sessionId)
 }
 
 // Start mocks base method.
-func (m *MockBackgroundWorker) Start(ctx context.Context) {
+func (m *MockWorker) Start(ctx context.Context) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Start", ctx)
 }
 
 // Start indicates an expected call of Start.
-func (mr *MockBackgroundWorkerMockRecorder) Start(ctx any) *gomock.Call {
+func (mr *MockWorkerMockRecorder) Start(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockBackgroundWorker)(nil).Start), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockWorker)(nil).Start), ctx)
 }
 
 // Stop mocks base method.
-func (m *MockBackgroundWorker) Stop() {
+func (m *MockWorker) Stop() {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Stop")
 }
 
 // Stop indicates an expected call of Stop.
-func (mr *MockBackgroundWorkerMockRecorder) Stop() *gomock.Call {
+func (mr *MockWorkerMockRecorder) Stop() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockBackgroundWorker)(nil).Stop))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockWorker)(nil).Stop))
 }
 
 // WithConfig mocks base method.
-func (m *MockBackgroundWorker) WithConfig(cfg config.WorkerConfig) *Worker {
+func (m *MockWorker) WithConfig(cfg config.WorkerConfig) Worker {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WithConfig", cfg)
-	ret0, _ := ret[0].(*Worker)
+	ret0, _ := ret[0].(Worker)
 	return ret0
 }
 
 // WithConfig indicates an expected call of WithConfig.
-func (mr *MockBackgroundWorkerMockRecorder) WithConfig(cfg any) *gomock.Call {
+func (mr *MockWorkerMockRecorder) WithConfig(cfg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithConfig", reflect.TypeOf((*MockBackgroundWorker)(nil).WithConfig), cfg)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithConfig", reflect.TypeOf((*MockWorker)(nil).WithConfig), cfg)
 }

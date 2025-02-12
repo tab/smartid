@@ -13,86 +13,87 @@ import (
 const (
 	CertificateLevel = "QUALIFIED"
 	InteractionType  = "displayTextAndPIN"
+	Text             = "Enter PIN1"
 	Timeout          = 60 * time.Second
 	URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
 )
 
-// Provider is the interface for the Smart-ID API client
-type Provider interface {
+type Client interface {
 	CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error)
 	FetchSession(ctx context.Context, sessionId string) (*Person, error)
+
+	WithCertificateLevel(level string) Client
+	WithHashType(hashType string) Client
+	WithInteractionType(interactionType string) Client
+	WithRelyingPartyName(name string) Client
+	WithRelyingPartyUUID(id string) Client
+	WithText(text string) Client
+	WithURL(url string) Client
+	WithTimeout(timeout time.Duration) Client
+
 	Validate() error
 }
 
-// Client holds the client configuration and the HTTP client
-type Client struct {
+type client struct {
 	config *config.Config
 }
 
-// NewClient creates a new Smart-ID client instance
-func NewClient() *Client {
+func NewClient() Client {
 	cfg := &config.Config{
 		CertificateLevel: CertificateLevel,
 		HashType:         utils.HashTypeSHA512,
 		InteractionType:  InteractionType,
+		Text:             Text,
 		URL:              URL,
 		Timeout:          Timeout,
 	}
 
-	return &Client{
+	return &client{
 		config: cfg,
 	}
 }
 
-// WithRelyingPartyName is option to set the RelyingPartyName
-func (c *Client) WithRelyingPartyName(name string) *Client {
+func (c *client) WithRelyingPartyName(name string) Client {
 	c.config.RelyingPartyName = name
 	return c
 }
 
-// WithRelyingPartyUUID is option to set the RelyingPartyUUID
-func (c *Client) WithRelyingPartyUUID(id string) *Client {
+func (c *client) WithRelyingPartyUUID(id string) Client {
 	c.config.RelyingPartyUUID = id
 	return c
 }
 
-// WithCertificateLevel is option to set the certificate level
-func (c *Client) WithCertificateLevel(level string) *Client {
+func (c *client) WithCertificateLevel(level string) Client {
 	c.config.CertificateLevel = level
 	return c
 }
 
-// WithHashType is option to set the hash type
-func (c *Client) WithHashType(hashType string) *Client {
+func (c *client) WithHashType(hashType string) Client {
 	c.config.HashType = hashType
 	return c
 }
 
-// WithInteractionType is option to set the interaction type
-func (c *Client) WithInteractionType(interactionType string) *Client {
+func (c *client) WithInteractionType(interactionType string) Client {
 	c.config.InteractionType = interactionType
 	return c
 }
 
-// WithText is option to set the display text
-func (c *Client) WithText(text string) *Client {
+func (c *client) WithText(text string) Client {
 	c.config.Text = text
 	return c
 }
 
-// WithURL is option to set the Smart-ID service URL
-func (c *Client) WithURL(url string) *Client {
+func (c *client) WithURL(url string) Client {
 	c.config.URL = url
 	return c
 }
 
-// WithTimeout is option to set the request timeout
-func (c *Client) WithTimeout(timeout time.Duration) *Client {
+func (c *client) WithTimeout(timeout time.Duration) Client {
 	c.config.Timeout = timeout
 	return c
 }
 
-func (c *Client) Validate() error {
+func (c *client) Validate() error {
 	if c.config.RelyingPartyName == "" {
 		return errors.ErrMissingRelyingPartyName
 	}
