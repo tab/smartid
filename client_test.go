@@ -7,20 +7,23 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/tab/smartid/internal/config"
+	"github.com/tab/smartid/internal/errors"
 )
 
 func Test_NewClient(t *testing.T) {
-	client := NewClient()
+	type result struct {
+		config *config.Config
+	}
 
 	tests := []struct {
 		name     string
-		before   func()
-		expected *Client
+		before   func(c Client)
+		expected result
 	}{
 		{
 			name: "Success",
-			before: func() {
-				client.
+			before: func(c Client) {
+				c.
 					WithRelyingPartyName("DEMO").
 					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
 					WithCertificateLevel("QUALIFIED").
@@ -30,7 +33,7 @@ func Test_NewClient(t *testing.T) {
 					WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 					WithTimeout(60 * time.Second)
 			},
-			expected: &Client{
+			expected: result{
 				config: &config.Config{
 					RelyingPartyName: "DEMO",
 					RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
@@ -45,12 +48,12 @@ func Test_NewClient(t *testing.T) {
 		},
 		{
 			name: "Default values",
-			before: func() {
-				client.
+			before: func(c Client) {
+				c.
 					WithRelyingPartyName("DEMO").
 					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
 			},
-			expected: &Client{
+			expected: result{
 				config: &config.Config{
 					RelyingPartyName: "DEMO",
 					RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
@@ -65,13 +68,12 @@ func Test_NewClient(t *testing.T) {
 		},
 		{
 			name: "Error: Missing relying party name",
-			before: func() {
-				client.
-					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
+			before: func(c Client) {
+				c.WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
 			},
-			expected: &Client{
+			expected: result{
 				config: &config.Config{
-					RelyingPartyName: "DEMO",
+					RelyingPartyName: "",
 					RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
@@ -84,14 +86,13 @@ func Test_NewClient(t *testing.T) {
 		},
 		{
 			name: "Error: Missing relying party UUID",
-			before: func() {
-				client.
-					WithRelyingPartyName("DEMO")
+			before: func(c Client) {
+				c.WithRelyingPartyName("DEMO")
 			},
-			expected: &Client{
+			expected: result{
 				config: &config.Config{
 					RelyingPartyName: "DEMO",
-					RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+					RelyingPartyUUID: "",
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
@@ -105,16 +106,19 @@ func Test_NewClient(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
+			c := NewClient()
+			tt.before(c)
 
-			assert.NotNil(t, client)
-			assert.Equal(t, tt.expected.config, client.config)
+			clientImpl := c.(*client)
+
+			assert.NotNil(t, clientImpl)
+			assert.Equal(t, tt.expected.config, clientImpl.config)
 		})
 	}
 }
 
 func Test_WithRelyingPartyName(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -135,14 +139,15 @@ func Test_WithRelyingPartyName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithRelyingPartyName(tt.param)
-			assert.Equal(t, tt.expected, client.config.RelyingPartyName)
+			c = c.WithRelyingPartyName(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.RelyingPartyName)
 		})
 	}
 }
 
 func Test_WithRelyingPartyUUID(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -163,14 +168,15 @@ func Test_WithRelyingPartyUUID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithRelyingPartyUUID(tt.param)
-			assert.Equal(t, tt.expected, client.config.RelyingPartyUUID)
+			c = c.WithRelyingPartyUUID(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.RelyingPartyUUID)
 		})
 	}
 }
 
 func Test_WithCertificateLevel(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -191,14 +197,15 @@ func Test_WithCertificateLevel(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithCertificateLevel(tt.param)
-			assert.Equal(t, tt.expected, client.config.CertificateLevel)
+			c = c.WithCertificateLevel(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.CertificateLevel)
 		})
 	}
 }
 
 func Test_WithHashType(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -219,14 +226,15 @@ func Test_WithHashType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithHashType(tt.param)
-			assert.Equal(t, tt.expected, client.config.HashType)
+			c = c.WithHashType(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.HashType)
 		})
 	}
 }
 
 func Test_WithInteractionType(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -247,14 +255,15 @@ func Test_WithInteractionType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithInteractionType(tt.param)
-			assert.Equal(t, tt.expected, client.config.InteractionType)
+			c = c.WithInteractionType(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.InteractionType)
 		})
 	}
 }
 
 func Test_WithText(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -275,14 +284,15 @@ func Test_WithText(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithText(tt.param)
-			assert.Equal(t, tt.expected, client.config.Text)
+			c = c.WithText(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.Text)
 		})
 	}
 }
 
 func Test_WithURL(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -303,14 +313,15 @@ func Test_WithURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithURL(tt.param)
-			assert.Equal(t, tt.expected, client.config.URL)
+			c = c.WithURL(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.URL)
 		})
 	}
 }
 
 func Test_WithTimeout(t *testing.T) {
-	client := NewClient()
+	c := NewClient()
 
 	tests := []struct {
 		name     string
@@ -331,8 +342,64 @@ func Test_WithTimeout(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client = client.WithTimeout(tt.param)
-			assert.Equal(t, tt.expected, client.config.Timeout)
+			c = c.WithTimeout(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.Timeout)
+		})
+	}
+}
+func Test_Validate(t *testing.T) {
+	tests := []struct {
+		name     string
+		before   func(c Client)
+		expected error
+		error    bool
+	}{
+		{
+			name: "Success",
+			before: func(c Client) {
+				c.
+					WithRelyingPartyName("DEMO").
+					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
+			},
+			expected: nil,
+			error:    false,
+		},
+		{
+			name: "Error: Missing Relying Party Name",
+			before: func(c Client) {
+				c.
+					WithRelyingPartyName("").
+					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
+			},
+			expected: errors.ErrMissingRelyingPartyName,
+			error:    true,
+		},
+		{
+			name: "Error: Missing Relying Party UUID",
+			before: func(c Client) {
+				c.
+					WithRelyingPartyName("DEMO").
+					WithRelyingPartyUUID("")
+			},
+			expected: errors.ErrMissingRelyingPartyUUID,
+			error:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewClient()
+
+			tt.before(c)
+
+			err := c.Validate()
+
+			if tt.error {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }

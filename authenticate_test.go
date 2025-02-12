@@ -239,12 +239,12 @@ func Test_FetchSession(t *testing.T) {
 			testServer := httptest.NewServer(http.HandlerFunc(tt.before))
 			defer testServer.Close()
 
-			client := NewClient()
-			client.WithRelyingPartyName("DEMO").
+			c := NewClient()
+			c.WithRelyingPartyName("DEMO").
 				WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
 				WithURL(testServer.URL)
 
-			session, err := client.FetchSession(ctx, tt.sessionId)
+			session, err := c.FetchSession(ctx, tt.sessionId)
 
 			if tt.error {
 				assert.Error(t, err)
@@ -253,62 +253,6 @@ func Test_FetchSession(t *testing.T) {
 				assert.NotNil(t, session)
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected, session)
-			}
-		})
-	}
-}
-
-func Test_Validate(t *testing.T) {
-	client := NewClient()
-
-	tests := []struct {
-		name     string
-		before   func()
-		expected error
-		error    bool
-	}{
-		{
-			name: "Success",
-			before: func() {
-				client.
-					WithRelyingPartyName("DEMO").
-					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
-			},
-			expected: nil,
-			error:    false,
-		},
-		{
-			name: "Error: Missing Relying Party Name",
-			before: func() {
-				client.
-					WithRelyingPartyName("").
-					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
-			},
-			expected: errors.ErrMissingRelyingPartyName,
-			error:    true,
-		},
-		{
-			name: "Error: Missing Relying Party UUID",
-			before: func() {
-				client.
-					WithRelyingPartyName("DEMO").
-					WithRelyingPartyUUID("")
-			},
-			expected: errors.ErrMissingRelyingPartyUUID,
-			error:    true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			err := client.Validate()
-
-			if tt.error {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
 			}
 		})
 	}

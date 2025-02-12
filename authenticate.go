@@ -36,7 +36,7 @@ func (e *Error) Error() string {
 }
 
 // CreateSession creates authentication session with the Smart-ID provider
-func (c *Client) CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error) {
+func (c *client) CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error) {
 	session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (c *Client) CreateSession(ctx context.Context, nationalIdentityNumber strin
 }
 
 // FetchSession fetches the authentication session from the Smart-ID provider
-func (c *Client) FetchSession(ctx context.Context, sessionId string) (*Person, error) {
+func (c *client) FetchSession(ctx context.Context, sessionId string) (*Person, error) {
 	response, err := requests.FetchAuthenticationSession(ctx, c.config, sessionId)
 	if err != nil {
 		return nil, err
