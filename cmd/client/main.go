@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/tab/smartid"
-	"github.com/tab/smartid/internal/config"
 )
 
 func main() {
@@ -33,11 +32,9 @@ func main() {
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039983"),
 	}
 
-	worker := smartid.NewWorker(client)
-	worker.WithConfig(config.WorkerConfig{
-		Concurrency: 50,
-		QueueSize:   100,
-	})
+	worker := smartid.NewWorker(client).
+		WithConcurrency(50).
+		WithQueueSize(100)
 
 	ctx := context.Background()
 

@@ -3,8 +3,6 @@ package smartid
 import (
 	"context"
 	"sync"
-
-	"github.com/tab/smartid/internal/config"
 )
 
 const (
@@ -18,15 +16,17 @@ type Result struct {
 }
 
 type Job struct {
-	sessionId string
-	resultCh  chan Result
+	SessionId string
+	ResultCh  chan Result
 }
 
 type Worker interface {
 	Start(ctx context.Context)
 	Stop()
 	Process(ctx context.Context, sessionId string) <-chan Result
-	WithConfig(cfg config.WorkerConfig) Worker
+
+	WithConcurrency(concurrency int) Worker
+	WithQueueSize(size int) Worker
 }
 
 type worker struct {
@@ -44,18 +44,21 @@ func NewWorker(client Client) Worker {
 	}
 }
 
-func (w *worker) WithConfig(cfg config.WorkerConfig) Worker {
-	if cfg.Concurrency == 0 {
-		cfg.Concurrency = DefaultConcurrency
+func (w *worker) WithConcurrency(concurrency int) Worker {
+	if concurrency <= 0 {
+		concurrency = DefaultConcurrency
 	}
 
-	if cfg.QueueSize == 0 {
-		cfg.QueueSize = DefaultQueueSize
+	w.concurrency = concurrency
+	return w
+}
+
+func (w *worker) WithQueueSize(size int) Worker {
+	if size <= 0 {
+		size = DefaultQueueSize
 	}
 
-	w.concurrency = cfg.Concurrency
-	w.queue = make(chan Job, cfg.QueueSize)
-
+	w.queue = make(chan Job, size)
 	return w
 }
 
@@ -78,7 +81,7 @@ func (w *worker) Process(ctx context.Context, sessionId string) <-chan Result {
 	case <-ctx.Done():
 		resultCh <- Result{Err: ctx.Err()}
 		close(resultCh)
-	case w.queue <- Job{sessionId: sessionId, resultCh: resultCh}:
+	case w.queue <- Job{SessionId: sessionId, ResultCh: resultCh}:
 	}
 
 	return resultCh
@@ -94,10 +97,10 @@ func (w *worker) perform(ctx context.Context) {
 				return
 			}
 
-			person, err := w.client.FetchSession(ctx, j.sessionId)
-			j.resultCh <- Result{Person: person, Err: err}
+			person, err := w.client.FetchSession(ctx, j.SessionId)
+			j.ResultCh <- Result{Person: person, Err: err}
 
-			close(j.resultCh)
+			close(j.ResultCh)
 		case <-ctx.Done():
 			return
 		}
