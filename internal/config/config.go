@@ -13,9 +13,3 @@ type Config struct {
 	URL              string
 	Timeout          time.Duration
 }
-
-// WorkerConfig is a struct holds the worker pool configuration options
-type WorkerConfig struct {
-	Concurrency int
-	QueueSize   int
-}

@@ -6,8 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
-
-	"github.com/tab/smartid/internal/config"
 )
 
 func Test_NewWorker(t *testing.T) {
@@ -26,10 +24,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Success",
 			before: func(w Worker) {
-				w.WithConfig(config.WorkerConfig{
-					Concurrency: 3,
-					QueueSize:   15,
-				})
+				w.WithConcurrency(3).WithQueueSize(15)
 			},
 			expected: result{
 				concurrency: 3,
@@ -37,10 +32,8 @@ func Test_NewWorker(t *testing.T) {
 			},
 		},
 		{
-			name: "Default values",
-			before: func(w Worker) {
-				w.WithConfig(config.WorkerConfig{})
-			},
+			name:   "Default values",
+			before: func(w Worker) {},
 			expected: result{
 				concurrency: DefaultConcurrency,
 				queueSize:   DefaultQueueSize,
@@ -49,10 +42,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Zero values",
 			before: func(w Worker) {
-				w.WithConfig(config.WorkerConfig{
-					Concurrency: 0,
-					QueueSize:   0,
-				})
+				w.WithConcurrency(0).WithQueueSize(0)
 			},
 			expected: result{
 				concurrency: DefaultConcurrency,
@@ -62,9 +52,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Without concurrency option",
 			before: func(w Worker) {
-				w.WithConfig(config.WorkerConfig{
-					QueueSize: 500,
-				})
+				w.WithQueueSize(500)
 			},
 			expected: result{
 				concurrency: DefaultConcurrency,
@@ -74,9 +62,7 @@ func Test_NewWorker(t *testing.T) {
 		{
 			name: "Without queue size option",
 			before: func(w Worker) {
-				w.WithConfig(config.WorkerConfig{
-					Concurrency: 25,
-				})
+				w.WithConcurrency(25)
 			},
 			expected: result{
 				concurrency: 25,
@@ -99,13 +85,144 @@ func Test_NewWorker(t *testing.T) {
 	}
 }
 
+func Test_Worker_WithConcurrency(t *testing.T) {
+	c := NewClient()
+
+	type result struct {
+		concurrency int
+		queueSize   int
+	}
+
+	tests := []struct {
+		name     string
+		before   func(w Worker)
+		expected result
+	}{
+		{
+			name: "Success",
+			before: func(w Worker) {
+				w.WithConcurrency(3)
+			},
+			expected: result{
+				concurrency: 3,
+				queueSize:   DefaultQueueSize,
+			},
+		},
+		{
+			name:   "Default values",
+			before: func(w Worker) {},
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   DefaultQueueSize,
+			},
+		},
+		{
+			name: "Zero values",
+			before: func(w Worker) {
+				w.WithConcurrency(0)
+			},
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   DefaultQueueSize,
+			},
+		},
+		{
+			name: "Without concurrency option",
+			before: func(w Worker) {
+				w.WithQueueSize(500)
+			},
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   500,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := NewWorker(c)
+
+			tt.before(w)
+
+			workerImpl := w.(*worker)
+
+			assert.Equal(t, tt.expected.concurrency, workerImpl.concurrency)
+			assert.Equal(t, tt.expected.queueSize, cap(workerImpl.queue))
+		})
+	}
+}
+
+func Test_Worker_WithQueueSize(t *testing.T) {
+	c := NewClient()
+
+	type result struct {
+		concurrency int
+		queueSize   int
+	}
+
+	tests := []struct {
+		name     string
+		before   func(w Worker)
+		expected result
+	}{
+		{
+			name: "Success",
+			before: func(w Worker) {
+				w.WithQueueSize(15)
+			},
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   15,
+			},
+		},
+		{
+			name:   "Default values",
+			before: func(w Worker) {},
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   DefaultQueueSize,
+			},
+		},
+		{
+			name: "Zero values",
+			before: func(w Worker) {
+				w.WithQueueSize(0)
+			},
+			expected: result{
+				concurrency: DefaultConcurrency,
+				queueSize:   DefaultQueueSize,
+			},
+		},
+		{
+			name: "Without queue size option",
+			before: func(w Worker) {
+				w.WithConcurrency(500)
+			},
+			expected: result{
+				concurrency: 500,
+				queueSize:   DefaultQueueSize,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := NewWorker(c)
+
+			tt.before(w)
+
+			workerImpl := w.(*worker)
+
+			assert.Equal(t, tt.expected.concurrency, workerImpl.concurrency)
+			assert.Equal(t, tt.expected.queueSize, cap(workerImpl.queue))
+		})
+	}
+}
+
 func Test_Worker_Start(t *testing.T) {
 	ctx := context.Background()
 	c := NewClient()
-	w := NewWorker(c).WithConfig(config.WorkerConfig{
-		Concurrency: 3,
-		QueueSize:   15,
-	})
+	w := NewWorker(c).WithConcurrency(3).WithQueueSize(15)
 
 	tests := []struct {
 		name string
@@ -128,10 +245,7 @@ func Test_Worker_Start(t *testing.T) {
 func Test_Worker_Stop(t *testing.T) {
 	ctx := context.Background()
 	c := NewClient()
-	w := NewWorker(c).WithConfig(config.WorkerConfig{
-		Concurrency: 3,
-		QueueSize:   15,
-	})
+	w := NewWorker(c).WithConcurrency(3).WithQueueSize(15)
 
 	tests := []struct {
 		name string
@@ -157,10 +271,7 @@ func Test_Worker_Process(t *testing.T) {
 
 	ctx := context.Background()
 	mockClient := NewMockClient(ctrl)
-	w := NewWorker(mockClient).WithConfig(config.WorkerConfig{
-		Concurrency: 3,
-		QueueSize:   15,
-	})
+	w := NewWorker(mockClient).WithConcurrency(3).WithQueueSize(15)
 	w.Start(ctx)
 	defer w.Stop()
 

@@ -13,7 +13,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	config "github.com/tab/smartid/internal/config"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -79,16 +78,30 @@ func (mr *MockWorkerMockRecorder) Stop() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockWorker)(nil).Stop))
 }
 
-// WithConfig mocks base method.
-func (m *MockWorker) WithConfig(cfg config.WorkerConfig) Worker {
+// WithConcurrency mocks base method.
+func (m *MockWorker) WithConcurrency(concurrency int) Worker {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithConfig", cfg)
+	ret := m.ctrl.Call(m, "WithConcurrency", concurrency)
 	ret0, _ := ret[0].(Worker)
 	return ret0
 }
 
-// WithConfig indicates an expected call of WithConfig.
-func (mr *MockWorkerMockRecorder) WithConfig(cfg any) *gomock.Call {
+// WithConcurrency indicates an expected call of WithConcurrency.
+func (mr *MockWorkerMockRecorder) WithConcurrency(concurrency any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithConfig", reflect.TypeOf((*MockWorker)(nil).WithConfig), cfg)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithConcurrency", reflect.TypeOf((*MockWorker)(nil).WithConcurrency), concurrency)
+}
+
+// WithQueueSize mocks base method.
+func (m *MockWorker) WithQueueSize(size int) Worker {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithQueueSize", size)
+	ret0, _ := ret[0].(Worker)
+	return ret0
+}
+
+// WithQueueSize indicates an expected call of WithQueueSize.
+func (mr *MockWorkerMockRecorder) WithQueueSize(size any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithQueueSize", reflect.TypeOf((*MockWorker)(nil).WithQueueSize), size)
 }
