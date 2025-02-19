@@ -40,5 +40,3 @@ linters-settings:
         disabled: true
   stylecheck:
     checks: ["^ST.*"]
-    ignored-checks:
-      - ST1003
