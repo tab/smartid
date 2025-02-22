@@ -23,11 +23,16 @@ const (
 	Timeout                   = 60 * time.Second
 )
 
+type Response struct {
+	Id   string `json:"sessionID"`
+	Code string `json:"code"`
+}
+
 func CreateAuthenticationSession(
 	ctx context.Context,
 	cfg *config.Config,
 	identity string,
-) (*models.Session, error) {
+) (*Response, error) {
 	hash, err := utils.GenerateHash(cfg.HashType)
 	if err != nil {
 		return nil, err
@@ -55,7 +60,7 @@ func CreateAuthenticationSession(
 	}
 
 	if response.IsSuccess() {
-		var result models.Session
+		var result Response
 		if err = json.Unmarshal(response.Body(), &result); err != nil {
 			return nil, err
 		}
@@ -65,7 +70,7 @@ func CreateAuthenticationSession(
 			return nil, err
 		}
 
-		return &models.Session{
+		return &Response{
 			Id:   result.Id,
 			Code: code,
 		}, nil

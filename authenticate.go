@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/tab/smartid/internal/errors"
-	"github.com/tab/smartid/internal/models"
 	"github.com/tab/smartid/internal/requests"
 	"github.com/tab/smartid/internal/utils"
 )
@@ -36,13 +35,13 @@ func (e *Error) Error() string {
 }
 
 // CreateSession creates authentication session with the Smart-ID provider
-func (c *client) CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error) {
+func (c *client) CreateSession(ctx context.Context, nationalIdentityNumber string) (*Session, error) {
 	session, err := requests.CreateAuthenticationSession(ctx, c.config, nationalIdentityNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	return session, nil
+	return (*Session)(session), nil
 }
 
 // FetchSession fetches the authentication session from the Smart-ID provider
