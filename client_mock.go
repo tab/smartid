@@ -14,7 +14,6 @@ import (
 	reflect "reflect"
 	time "time"
 
-	models "github.com/tab/smartid/internal/models"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -43,10 +42,10 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // CreateSession mocks base method.
-func (m *MockClient) CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error) {
+func (m *MockClient) CreateSession(ctx context.Context, nationalIdentityNumber string) (*Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", ctx, nationalIdentityNumber)
-	ret0, _ := ret[0].(*models.Session)
+	ret0, _ := ret[0].(*Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

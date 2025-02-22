@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/tab/smartid/internal/errors"
-	"github.com/tab/smartid/internal/models"
 )
 
 func Test_CreateSession(t *testing.T) {
@@ -19,7 +18,7 @@ func Test_CreateSession(t *testing.T) {
 		name     string
 		before   func(w http.ResponseWriter, r *http.Request)
 		identity string
-		expected *models.Session
+		expected *Session
 		err      error
 	}{
 		{
@@ -30,7 +29,7 @@ func Test_CreateSession(t *testing.T) {
 				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
 			},
 			identity: "PNOEE-30303039914",
-			expected: &models.Session{
+			expected: &Session{
 				Id:   "8fdb516d-1a82-43ba-b82d-be63df569b86",
 				Code: "1234",
 			},

@@ -37,8 +37,3 @@ type AuthenticationResponse struct {
 	Cert                Certificate `json:"cert"`
 	InteractionFlowUsed string      `json:"interactionFlowUsed"`
 }
-
-type Session struct {
-	Id   string `json:"sessionID"`
-	Code string `json:"code"`
-}

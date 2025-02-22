@@ -6,7 +6,6 @@ import (
 
 	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/errors"
-	"github.com/tab/smartid/internal/models"
 	"github.com/tab/smartid/internal/utils"
 )
 
@@ -19,7 +18,7 @@ const (
 )
 
 type Client interface {
-	CreateSession(ctx context.Context, nationalIdentityNumber string) (*models.Session, error)
+	CreateSession(ctx context.Context, nationalIdentityNumber string) (*Session, error)
 	FetchSession(ctx context.Context, sessionId string) (*Person, error)
 
 	WithCertificateLevel(level string) Client
