@@ -38,7 +38,7 @@ func CreateAuthenticationSession(
 		return nil, err
 	}
 
-	body := models.AuthenticationSessionRequest{
+	body := models.AuthenticationRequest{
 		RelyingPartyName:       cfg.RelyingPartyName,
 		RelyingPartyUUID:       cfg.RelyingPartyUUID,
 		NationalIdentityNumber: identity,
