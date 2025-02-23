@@ -21,11 +21,11 @@ type Client interface {
 	CreateSession(ctx context.Context, nationalIdentityNumber string) (*Session, error)
 	FetchSession(ctx context.Context, sessionId string) (*Person, error)
 
+	WithRelyingPartyName(name string) Client
+	WithRelyingPartyUUID(id string) Client
 	WithCertificateLevel(level string) Client
 	WithHashType(hashType string) Client
 	WithInteractionType(interactionType string) Client
-	WithRelyingPartyName(name string) Client
-	WithRelyingPartyUUID(id string) Client
 	WithText(text string) Client
 	WithURL(url string) Client
 	WithTimeout(timeout time.Duration) Client
