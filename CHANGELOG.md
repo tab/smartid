@@ -1,6 +1,17 @@
 
 # CHANGELOG
 
+## [v0.1.1](https://github.com/tab/smartid/releases/tag/v0.1.1)
+
+### Refactor
+- **refactor(models):** Rename AuthenticationSessionRequest to AuthenticationRequest
+
+### Documentation
+- **docs(readme):** Update README with sections for installation, client creation, authentication session initiation, session fetching, asynchronous processing, and identity preparation
+
+### CI
+- **ci(workflow):** Add Codecov workflow for master branch
+
 ## [v0.1.0](https://github.com/tab/smartid/releases/tag/v0.1.0)
 
 ### Features
@@ -23,7 +34,7 @@
 - **refactor(worker):** Refactor worker to pass context in Process method
 
 ### CI
-- **ci(github):** Update GitHub Actions workflow and staticcheck configuration
+- **ci(workflow):** Update GitHub Actions workflow and staticcheck configuration
 - **ci(workflow):** Disable Go installation in staticcheck action
 
 ### Chore
