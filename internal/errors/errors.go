@@ -18,7 +18,9 @@ var (
 	ErrSmartIdClientTooOld      = errors.New("the client is too old and not supported anymore")
 	ErrSmartIdMaintenance       = errors.New("system is under maintenance, retry again later")
 
-	ErrInvalidCertificate    = errors.New("invalid certificate")
+	ErrInvalidCertificate = errors.New("invalid certificate")
+
+	ErrEmptyIdentityNumber   = errors.New("empty identity number")
 	ErrInvalidIdentityNumber = errors.New("invalid identity number")
 
 	ErrFailedToGenerateRandomBytes = errors.New("failed to generate random bytes")
