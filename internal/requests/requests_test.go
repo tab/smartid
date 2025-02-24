@@ -62,6 +62,54 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 			error:    true,
 		},
 		{
+			name: "Error: 471 No Suitable Account",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusNoSuitableAccount)
+				w.Write([]byte(`{"title": "No Suitable Account", "status": 471}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: &Response{},
+			err:      errors.ErrSmartIdNoSuitableAccount,
+			error:    true,
+		},
+		{
+			name: "Error: 472 View Smart-ID App",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusViewSmartIdApp)
+				w.Write([]byte(`{"title": "View Smart-ID App", "status": 472}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: &Response{},
+			err:      errors.ErrSmartIdViewApp,
+			error:    true,
+		},
+		{
+			name: "Error: 473 Client Too Old",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusClientTooOld)
+				w.Write([]byte(`{"title": "Client Too Old", "status": 473}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: &Response{},
+			err:      errors.ErrSmartIdClientTooOld,
+			error:    true,
+		},
+		{
+			name: "Error: 474 System Maintenance",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusSystemMaintenance)
+				w.Write([]byte(`{"title": "System Maintenance", "status": 474}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: &Response{},
+			err:      errors.ErrSmartIdMaintenance,
+			error:    true,
+		},
+		{
 			name: "Error: Bad Request",
 			before: func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
@@ -225,6 +273,54 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 			id:       id,
 			expected: &models.AuthenticationResponse{},
 			err:      errors.ErrSmartIdProviderError,
+			error:    true,
+		},
+		{
+			name: "Error 471: No Suitable Account",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusNoSuitableAccount)
+				w.Write([]byte(`{"title": "No Suitable Account", "status": 471}`))
+			},
+			id:       id,
+			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdNoSuitableAccount,
+			error:    true,
+		},
+		{
+			name: "Error 472: View Smart-ID App",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusViewSmartIdApp)
+				w.Write([]byte(`{"title": "View Smart-ID App", "status": 472}`))
+			},
+			id:       id,
+			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdViewApp,
+			error:    true,
+		},
+		{
+			name: "Error 473: Client Too Old",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusClientTooOld)
+				w.Write([]byte(`{"title": "Client Too Old", "status": 473}`))
+			},
+			id:       id,
+			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdClientTooOld,
+			error:    true,
+		},
+		{
+			name: "Error 474: System Maintenance",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(StatusSystemMaintenance)
+				w.Write([]byte(`{"title": "System Maintenance", "status": 474}`))
+			},
+			id:       id,
+			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdMaintenance,
 			error:    true,
 		},
 		{
