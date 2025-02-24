@@ -21,6 +21,11 @@ const (
 	IdleConnTimeout           = 90 * time.Second
 	TLSHandshakeTimeout       = 10 * time.Second
 	Timeout                   = 60 * time.Second
+
+	StatusNoSuitableAccount = 471
+	StatusViewSmartIdApp    = 472
+	StatusClientTooOld      = 480
+	StatusSystemMaintenance = 580
 )
 
 type Response struct {
@@ -76,7 +81,18 @@ func CreateAuthenticationSession(
 		}, nil
 	}
 
-	return nil, errors.ErrSmartIdProviderError
+	switch response.StatusCode() {
+	case StatusNoSuitableAccount:
+		return nil, errors.ErrSmartIdNoSuitableAccount
+	case StatusViewSmartIdApp:
+		return nil, errors.ErrSmartIdViewApp
+	case StatusClientTooOld:
+		return nil, errors.ErrSmartIdClientTooOld
+	case StatusSystemMaintenance:
+		return nil, errors.ErrSmartIdMaintenance
+	default:
+		return nil, errors.ErrSmartIdProviderError
+	}
 }
 
 func FetchAuthenticationSession(
@@ -100,11 +116,20 @@ func FetchAuthenticationSession(
 		return &result, nil
 	}
 
-	if response.StatusCode() == http.StatusNotFound {
+	switch response.StatusCode() {
+	case http.StatusNotFound:
 		return nil, errors.ErrSmartIdSessionNotFound
+	case StatusNoSuitableAccount:
+		return nil, errors.ErrSmartIdNoSuitableAccount
+	case StatusViewSmartIdApp:
+		return nil, errors.ErrSmartIdViewApp
+	case StatusClientTooOld:
+		return nil, errors.ErrSmartIdClientTooOld
+	case StatusSystemMaintenance:
+		return nil, errors.ErrSmartIdMaintenance
+	default:
+		return nil, errors.ErrSmartIdProviderError
 	}
-
-	return nil, errors.ErrSmartIdProviderError
 }
 
 func httpClient(cfg *config.Config) *resty.Client {

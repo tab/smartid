@@ -13,6 +13,11 @@ var (
 	ErrSmartIdProviderError   = errors.New("Smart-ID provider error")
 	ErrSmartIdSessionNotFound = errors.New("Smart-ID session not found or expired")
 
+	ErrSmartIdNoSuitableAccount = errors.New("no suitable account of requested type found")
+	ErrSmartIdViewApp           = errors.New("check Smart-ID app or self-service portal now")
+	ErrSmartIdClientTooOld      = errors.New("the client is too old and not supported anymore")
+	ErrSmartIdMaintenance       = errors.New("system is under maintenance, retry again later")
+
 	ErrInvalidCertificate    = errors.New("invalid certificate")
 	ErrInvalidIdentityNumber = errors.New("invalid identity number")
 
