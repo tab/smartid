@@ -1,5 +1,9 @@
-
 # CHANGELOG
+
+## [v0.2.1](https://github.com/tab/smartid/releases/tag/v0.2.1)
+
+### Bug Fixes
+- **fix(tls):** Rename certificate pinner to certificate manager
 
 ## [v0.2.0](https://github.com/tab/smartid/releases/tag/v0.2.0)
 
