@@ -29,14 +29,34 @@ func main() {
 		WithTLSConfig(tlsConfig)
 
 	identities := []string{
+		smartid.NewIdentity(smartid.TypePNO, "EE", "40504040001"),
+		smartid.NewIdentity(smartid.TypePNO, "LT", "40504040001"),
+		smartid.NewIdentity(smartid.TypePNO, "LV", "050405-10009"),
+		smartid.NewIdentity(smartid.TypePNO, "BE", "05040400032"),
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914"),
+
+		// NOTE: USER_REFUSED
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039917"),
+
+		// NOTE: USER_REFUSED_DISPLAYTEXTANDPIN
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039928"),
+
+		// NOTE: USER_REFUSED_VC_CHOICE
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039939"),
+
+		// NOTE: USER_REFUSED_CONFIRMATIONMESSAGE
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039946"),
+
+		// NOTE: USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039950"),
+
+		// NOTE: USER_REFUSED_CERT_CHOICE
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039961"),
+
+		// NOTE: WRONG_VC
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039972"),
+
+		// NOTE: TIMEOUT
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30403039983"),
 	}
 
