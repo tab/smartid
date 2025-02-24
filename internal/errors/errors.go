@@ -25,4 +25,10 @@ var (
 
 	ErrFailedToDecodeCertificate = errors.New("failed to decode certificate")
 	ErrFailedToParseCertificate  = errors.New("failed to parse certificate")
+
+	ErrFailedToReadCertificateFile   = errors.New("failed to read certificate file")
+	ErrFailedToDecodeCertificateFile = errors.New("failed to decode certificate file")
+	ErrFailedToParseCertificateFile  = errors.New("failed to parse certificate file")
+
+	ErrFailedToVerifyCertificate = errors.New("failed to verify certificate pinning")
 )

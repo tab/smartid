@@ -11,6 +11,7 @@ package smartid
 
 import (
 	context "context"
+	tls "crypto/tls"
 	reflect "reflect"
 	time "time"
 
@@ -153,6 +154,20 @@ func (m *MockClient) WithRelyingPartyUUID(id string) Client {
 func (mr *MockClientMockRecorder) WithRelyingPartyUUID(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithRelyingPartyUUID", reflect.TypeOf((*MockClient)(nil).WithRelyingPartyUUID), id)
+}
+
+// WithTLSConfig mocks base method.
+func (m *MockClient) WithTLSConfig(tlsConfig *tls.Config) Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTLSConfig", tlsConfig)
+	ret0, _ := ret[0].(Client)
+	return ret0
+}
+
+// WithTLSConfig indicates an expected call of WithTLSConfig.
+func (mr *MockClientMockRecorder) WithTLSConfig(tlsConfig any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTLSConfig", reflect.TypeOf((*MockClient)(nil).WithTLSConfig), tlsConfig)
 }
 
 // WithText mocks base method.
