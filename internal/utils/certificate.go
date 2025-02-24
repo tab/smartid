@@ -3,14 +3,10 @@ package utils
 import (
 	"crypto/x509"
 	"encoding/base64"
-	"regexp"
 	"strings"
 
 	"github.com/tab/smartid/internal/errors"
-)
-
-var (
-	identityRegex = regexp.MustCompile(`^(PAS|IDC|PNO)([A-Z]{2})-([A-Za-z0-9]+)$`)
+	"github.com/tab/smartid/internal/identity"
 )
 
 type Person struct {
@@ -36,7 +32,7 @@ func Extract(encodedCert string) (*Person, error) {
 		return nil, errors.ErrInvalidCertificate
 	}
 
-	identity, err := parse(cert.Subject.SerialNumber)
+	result, err := identity.Parse(cert.Subject.SerialNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -45,31 +41,8 @@ func Extract(encodedCert string) (*Person, error) {
 
 	return &Person{
 		IdentityNumber: cert.Subject.SerialNumber,
-		PersonalCode:   identity.ID,
+		PersonalCode:   result.ID,
 		FirstName:      firstName,
 		LastName:       lastName,
-	}, nil
-}
-
-type Identity struct {
-	Country string
-	Type    string
-	ID      string
-}
-
-func parse(value string) (*Identity, error) {
-	if value == "" {
-		return nil, errors.ErrInvalidIdentityNumber
-	}
-
-	matches := identityRegex.FindStringSubmatch(value)
-	if len(matches) != 4 {
-		return nil, errors.ErrInvalidIdentityNumber
-	}
-
-	return &Identity{
-		Type:    matches[1],
-		Country: matches[2],
-		ID:      matches[3],
 	}, nil
 }
