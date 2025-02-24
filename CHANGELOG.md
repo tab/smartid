@@ -1,6 +1,22 @@
 
 # CHANGELOG
 
+## [v0.2.0](https://github.com/tab/smartid/releases/tag/v0.2.0)
+
+### Features
+- **feat(tls):** Add certificate pinning support in the Smart-ID client using TLS configuration
+
+### Bug Fixes
+- **fix(identity):** Fix identity regex
+- **fix(requests):** Support custom HTTP status codes: 471, 472, 480, 580
+
+### Tests
+- **test(utils):** Enhance certificate extraction tests
+
+### Chore
+- **chore(workflow):** Add workflow permissions
+- **chore(codecov):** Update ignore patterns in codecov.yaml
+
 ## [v0.1.1](https://github.com/tab/smartid/releases/tag/v0.1.1)
 
 ### Refactor
