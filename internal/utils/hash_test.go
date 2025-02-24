@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/tab/smartid/internal/errors"
 )
 
 func Test_GenerateHash(t *testing.T) {
@@ -12,10 +14,16 @@ func Test_GenerateHash(t *testing.T) {
 		name     string
 		hashType string
 		error    bool
+		err      error
 	}{
 		{
 			name:     "Success: SHA256",
 			hashType: "SHA256",
+			error:    false,
+		},
+		{
+			name:     "Success: sha256",
+			hashType: "sha256",
 			error:    false,
 		},
 		{
@@ -24,14 +32,31 @@ func Test_GenerateHash(t *testing.T) {
 			error:    false,
 		},
 		{
+			name:     "Success: sha384",
+			hashType: "sha384",
+			error:    false,
+		},
+		{
 			name:     "Success: SHA512",
 			hashType: "SHA512",
+			error:    false,
+		},
+		{
+			name:     "Success: sha512",
+			hashType: "sha512",
 			error:    false,
 		},
 		{
 			name:     "Error: Unsupported hash type",
 			hashType: "MD5",
 			error:    true,
+			err:      errors.ErrUnsupportedHashType,
+		},
+		{
+			name:     "Error: Empty hash type",
+			hashType: "",
+			error:    true,
+			err:      errors.ErrUnsupportedHashType,
 		},
 	}
 
@@ -41,6 +66,7 @@ func Test_GenerateHash(t *testing.T) {
 
 			if tt.error {
 				assert.Error(t, err)
+				assert.Equal(t, tt.err, err)
 				assert.Empty(t, hash)
 			} else {
 				assert.NoError(t, err)
