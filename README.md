@@ -155,6 +155,42 @@ func main() {
 }
 ```
 
+### Certificate pinning (optional)
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "sync"
+  "time"
+
+  "github.com/tab/smartid"
+  "github.com/tab/smartid/internal/certificates"
+)
+
+func main() {
+  pinner, err := certificates.NewCertificatePinner("./certs")
+  if err != nil {
+    fmt.Println("Failed to create certificate pinner:", err)
+  }
+  tlsConfig := pinner.TLSConfig()
+
+  client := smartid.NewClient().
+    WithRelyingPartyName("DEMO").
+    WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
+    WithCertificateLevel("QUALIFIED").
+    WithHashType("SHA512").
+    WithInteractionType("displayTextAndPIN").
+    WithText("Enter PIN1").
+    WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
+    WithTimeout(60 * time.Second).
+    WithTLSConfig(tlsConfig)
+
+  // Further processing...
+```
+
 ### Prepare Identity
 
 Smart-ID requires a properly formatted identity string. Use the `NewIdentity` function to create this string.

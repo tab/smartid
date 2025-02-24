@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/tab/smartid/internal/certificates"
 	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/errors"
 )
@@ -43,6 +44,7 @@ func Test_NewClient(t *testing.T) {
 					Text:             "Enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
+					TLSConfig:        nil,
 				},
 			},
 		},
@@ -63,6 +65,7 @@ func Test_NewClient(t *testing.T) {
 					Text:             "Enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
+					TLSConfig:        nil,
 				},
 			},
 		},
@@ -81,6 +84,7 @@ func Test_NewClient(t *testing.T) {
 					Text:             "Enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
+					TLSConfig:        nil,
 				},
 			},
 		},
@@ -99,6 +103,7 @@ func Test_NewClient(t *testing.T) {
 					Text:             "Enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
+					TLSConfig:        nil,
 				},
 			},
 		},
@@ -348,6 +353,84 @@ func Test_WithTimeout(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_WithTLSConfig(t *testing.T) {
+	pinner, err := certificates.NewCertificatePinner("./certs")
+	assert.NoError(t, err)
+
+	tlsConfig := pinner.TLSConfig()
+
+	type result struct {
+		config *config.Config
+	}
+
+	tests := []struct {
+		name     string
+		before   func(c Client)
+		expected result
+	}{
+		{
+			name: "Success",
+			before: func(c Client) {
+				c.
+					WithRelyingPartyName("DEMO").
+					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
+					WithCertificateLevel("QUALIFIED").
+					WithHashType("SHA512").
+					WithInteractionType("displayTextAndPIN").
+					WithText("Enter PIN1").
+					WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
+					WithTimeout(60 * time.Second).
+					WithTLSConfig(tlsConfig)
+			},
+			expected: result{
+				config: &config.Config{
+					RelyingPartyName: "DEMO",
+					RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+					CertificateLevel: "QUALIFIED",
+					HashType:         "SHA512",
+					InteractionType:  "displayTextAndPIN",
+					Text:             "Enter PIN1",
+					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
+					Timeout:          60 * time.Second,
+					TLSConfig:        tlsConfig,
+				},
+			},
+		},
+		{
+			name: "Without TLS Config",
+			before: func(c Client) {
+				c.
+					WithRelyingPartyName("DEMO").
+					WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000")
+			},
+			expected: result{
+				config: &config.Config{
+					RelyingPartyName: "DEMO",
+					RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+					CertificateLevel: "QUALIFIED",
+					HashType:         "SHA512",
+					InteractionType:  "displayTextAndPIN",
+					Text:             "Enter PIN1",
+					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
+					Timeout:          60 * time.Second,
+					TLSConfig:        nil,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewClient()
+			tt.before(c)
+
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected.config, clientImpl.config)
+		})
+	}
+}
+
 func Test_Validate(t *testing.T) {
 	tests := []struct {
 		name     string

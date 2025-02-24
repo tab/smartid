@@ -54,7 +54,7 @@ func CreateAuthenticationSession(
 	}
 
 	endpoint := fmt.Sprintf("%s/authentication/etsi/%s", cfg.URL, identity)
-	response, err := httpClient().R().SetContext(ctx).SetBody(body).Post(endpoint)
+	response, err := httpClient(cfg).R().SetContext(ctx).SetBody(body).Post(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func FetchAuthenticationSession(
 ) (*models.AuthenticationResponse, error) {
 	endpoint := fmt.Sprintf("%s/session/%s", cfg.URL, sessionId)
 
-	response, err := httpClient().R().SetContext(ctx).Get(endpoint)
+	response, err := httpClient(cfg).R().SetContext(ctx).Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -107,12 +107,13 @@ func FetchAuthenticationSession(
 	return nil, errors.ErrSmartIdProviderError
 }
 
-func httpClient() *resty.Client {
+func httpClient(cfg *config.Config) *resty.Client {
 	transport := &http.Transport{
 		MaxIdleConns:        MaxIdleConnections,
 		MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
 		IdleConnTimeout:     IdleConnTimeout,
 		TLSHandshakeTimeout: TLSHandshakeTimeout,
+		TLSClientConfig:     cfg.TLSConfig,
 	}
 
 	client := resty.NewWithClient(&http.Client{

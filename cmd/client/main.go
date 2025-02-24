@@ -7,9 +7,16 @@ import (
 	"time"
 
 	"github.com/tab/smartid"
+	"github.com/tab/smartid/internal/certificates"
 )
 
 func main() {
+	pinner, err := certificates.NewCertificatePinner("./certs")
+	if err != nil {
+		fmt.Println("Failed to create certificate pinner:", err)
+	}
+	tlsConfig := pinner.TLSConfig()
+
 	client := smartid.NewClient().
 		WithRelyingPartyName("DEMO").
 		WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
@@ -18,7 +25,8 @@ func main() {
 		WithInteractionType("displayTextAndPIN").
 		WithText("Enter PIN1").
 		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
-		WithTimeout(60 * time.Second)
+		WithTimeout(60 * time.Second).
+		WithTLSConfig(tlsConfig)
 
 	identities := []string{
 		smartid.NewIdentity(smartid.TypePNO, "EE", "30303039914"),

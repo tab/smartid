@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"crypto/tls"
+	"time"
+)
 
 // Config is a struct holds the client configuration options
 type Config struct {
@@ -12,4 +15,5 @@ type Config struct {
 	Text             string
 	URL              string
 	Timeout          time.Duration
+	TLSConfig        *tls.Config
 }

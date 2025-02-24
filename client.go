@@ -2,6 +2,7 @@ package smartid
 
 import (
 	"context"
+	"crypto/tls"
 	"time"
 
 	"github.com/tab/smartid/internal/config"
@@ -29,6 +30,7 @@ type Client interface {
 	WithText(text string) Client
 	WithURL(url string) Client
 	WithTimeout(timeout time.Duration) Client
+	WithTLSConfig(tlsConfig *tls.Config) Client
 
 	Validate() error
 }
@@ -89,6 +91,11 @@ func (c *client) WithURL(url string) Client {
 
 func (c *client) WithTimeout(timeout time.Duration) Client {
 	c.config.Timeout = timeout
+	return c
+}
+
+func (c *client) WithTLSConfig(tlsConfig *tls.Config) Client {
+	c.config.TLSConfig = tlsConfig
 	return c
 }
 
