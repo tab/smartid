@@ -119,11 +119,11 @@ func Example_ProcessMultipleIdentitiesInBackground() {
 }
 
 func Example_ProcessMultipleIdentitiesInBackground_WithTLS() {
-	pinner, err := certificates.NewCertificatePinner("./certs")
+	manager, err := smartid.NewCertificateManager("./certs")
 	if err != nil {
-		fmt.Println("Failed to create certificate pinner:", err)
+		fmt.Println("Failed to create certificate manager:", err)
 	}
-	tlsConfig := pinner.TLSConfig()
+	tlsConfig := manager.TLSConfig()
 
 	client := smartid.NewClient().
 		WithRelyingPartyName("DEMO").

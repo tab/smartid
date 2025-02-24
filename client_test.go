@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/tab/smartid/internal/certificates"
 	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/errors"
 )
@@ -355,10 +354,10 @@ func Test_WithTimeout(t *testing.T) {
 }
 
 func TestClient_WithTLSConfig(t *testing.T) {
-	pinner, err := certificates.NewCertificatePinner("./certs")
+	manager, err := NewCertificateManager("./certs")
 	assert.NoError(t, err)
 
-	tlsConfig := pinner.TLSConfig()
+	tlsConfig := manager.TLSConfig()
 
 	type result struct {
 		config *config.Config

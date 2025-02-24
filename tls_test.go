@@ -1,4 +1,4 @@
-package certificates
+package smartid
 
 import (
 	"crypto/x509"
@@ -6,10 +6,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/tab/smartid/internal/certificates"
 	"github.com/tab/smartid/internal/errors"
 )
 
-func Test_NewCertificatePinner(t *testing.T) {
+func Test_NewCertificateManager(t *testing.T) {
 	tests := []struct {
 		name string
 		dir  string
@@ -17,19 +18,19 @@ func Test_NewCertificatePinner(t *testing.T) {
 	}{
 		{
 			name: "Success",
-			dir:  "testdata/valid",
+			dir:  "internal/certificates/testdata/valid",
 			err:  nil,
 		},
 		{
 			name: "Error: Failed to read certificate file",
-			dir:  "testdata/missing",
+			dir:  "internal/certificates/testdata/missing",
 			err:  errors.ErrFailedToReadCertificateFile,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewCertificatePinner(tt.dir)
+			_, err := NewCertificateManager(tt.dir)
 
 			if tt.err != nil {
 				assert.Equal(t, tt.err, err)
@@ -40,8 +41,8 @@ func Test_NewCertificatePinner(t *testing.T) {
 	}
 }
 
-func Test_Pinner_VerifyPeerCertificate(t *testing.T) {
-	certPEM, err := LoadFromFile("testdata/valid/cert.pem")
+func Test_Manager_VerifyPeerCertificate(t *testing.T) {
+	certPEM, err := certificates.LoadFromFile("internal/certificates/testdata/valid/cert.pem")
 	assert.NoError(t, err)
 
 	tests := []struct {
@@ -72,7 +73,7 @@ func Test_Pinner_VerifyPeerCertificate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pinner{
+			p := &Manager{
 				certificates: tt.certs,
 			}
 
@@ -86,8 +87,8 @@ func Test_Pinner_VerifyPeerCertificate(t *testing.T) {
 	}
 }
 
-func Test_Pinner_TLSConfig(t *testing.T) {
-	p := &Pinner{}
+func Test_TLSConfig(t *testing.T) {
+	p := &Manager{}
 	config := p.TLSConfig()
 
 	assert.NotNil(t, config)
