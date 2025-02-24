@@ -1,4 +1,4 @@
-package certificates
+package smartid
 
 import (
 	"crypto/sha256"
@@ -6,27 +6,28 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 
+	"github.com/tab/smartid/internal/certificates"
 	"github.com/tab/smartid/internal/errors"
 )
 
-type Pinner struct {
+type Manager struct {
 	certificates []*x509.Certificate
 }
 
-// NewCertificatePinner creates a new certificate pinner instance
-func NewCertificatePinner(certsDir string) (*Pinner, error) {
-	certs, err := LoadFromDir(certsDir)
+// NewCertificateManager creates a new certificate manager instance
+func NewCertificateManager(certsDir string) (*Manager, error) {
+	certs, err := certificates.LoadFromDir(certsDir)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Pinner{
+	return &Manager{
 		certificates: certs,
 	}, nil
 }
 
-// TLSConfig returns a new tls.Config instance with the certificate pinner
-func (p *Pinner) TLSConfig() *tls.Config {
+// TLSConfig returns a new tls.Config instance with the certificate pinning
+func (p *Manager) TLSConfig() *tls.Config {
 	return &tls.Config{
 		VerifyPeerCertificate: p.VerifyPeerCertificate,
 		MinVersion:            tls.VersionTLS12,
@@ -34,7 +35,7 @@ func (p *Pinner) TLSConfig() *tls.Config {
 }
 
 // VerifyPeerCertificate verifies the peer certificate against the pinned certificates
-func (p *Pinner) VerifyPeerCertificate(rawCerts [][]byte, _ [][]*x509.Certificate) error {
+func (p *Manager) VerifyPeerCertificate(rawCerts [][]byte, _ [][]*x509.Certificate) error {
 	for _, rawCert := range rawCerts {
 		cert, err := x509.ParseCertificate(rawCert)
 		if err != nil {
