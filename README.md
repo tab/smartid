@@ -213,6 +213,11 @@ func main() {
 }
 ```
 
+## Documentation
+
+- [GoDoc](https://pkg.go.dev/github.com/tab/smartid)
+- [Smart-ID Documentation](https://github.com/SK-EID/smart-id-documentation)
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
