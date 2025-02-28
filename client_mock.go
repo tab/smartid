@@ -100,6 +100,34 @@ func (mr *MockClientMockRecorder) WithCertificateLevel(level any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithCertificateLevel", reflect.TypeOf((*MockClient)(nil).WithCertificateLevel), level)
 }
 
+// WithDisplayText200 mocks base method.
+func (m *MockClient) WithDisplayText200(text string) Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithDisplayText200", text)
+	ret0, _ := ret[0].(Client)
+	return ret0
+}
+
+// WithDisplayText200 indicates an expected call of WithDisplayText200.
+func (mr *MockClientMockRecorder) WithDisplayText200(text any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDisplayText200", reflect.TypeOf((*MockClient)(nil).WithDisplayText200), text)
+}
+
+// WithDisplayText60 mocks base method.
+func (m *MockClient) WithDisplayText60(text string) Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithDisplayText60", text)
+	ret0, _ := ret[0].(Client)
+	return ret0
+}
+
+// WithDisplayText60 indicates an expected call of WithDisplayText60.
+func (mr *MockClientMockRecorder) WithDisplayText60(text any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDisplayText60", reflect.TypeOf((*MockClient)(nil).WithDisplayText60), text)
+}
+
 // WithHashType mocks base method.
 func (m *MockClient) WithHashType(hashType string) Client {
 	m.ctrl.T.Helper()
@@ -168,20 +196,6 @@ func (m *MockClient) WithTLSConfig(tlsConfig *tls.Config) Client {
 func (mr *MockClientMockRecorder) WithTLSConfig(tlsConfig any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTLSConfig", reflect.TypeOf((*MockClient)(nil).WithTLSConfig), tlsConfig)
-}
-
-// WithText mocks base method.
-func (m *MockClient) WithText(text string) Client {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithText", text)
-	ret0, _ := ret[0].(Client)
-	return ret0
-}
-
-// WithText indicates an expected call of WithText.
-func (mr *MockClientMockRecorder) WithText(text any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithText", reflect.TypeOf((*MockClient)(nil).WithText), text)
 }
 
 // WithTimeout mocks base method.

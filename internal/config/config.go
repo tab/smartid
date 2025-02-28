@@ -12,7 +12,8 @@ type Config struct {
 	CertificateLevel string
 	HashType         string
 	InteractionType  string
-	Text             string
+	DisplayText60    string
+	DisplayText200   string
 	URL              string
 	Timeout          time.Duration
 	TLSConfig        *tls.Config

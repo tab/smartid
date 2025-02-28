@@ -7,13 +7,15 @@ import (
 
 	"github.com/tab/smartid/internal/config"
 	"github.com/tab/smartid/internal/errors"
+	"github.com/tab/smartid/internal/requests"
 	"github.com/tab/smartid/internal/utils"
 )
 
 const (
-	CertificateLevel = "QUALIFIED"
-	InteractionType  = "displayTextAndPIN"
-	Text             = "Enter PIN1"
+	CertificateLevel = requests.CertificateLevelQUALIFIED
+	InteractionType  = requests.InteractionTypeDisplayTextAndPIN
+	DisplayText60    = "Enter PIN1"
+	DisplayText200   = "Confirm the authentication request and enter PIN1"
 	Timeout          = 60 * time.Second
 	URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
 )
@@ -27,7 +29,8 @@ type Client interface {
 	WithCertificateLevel(level string) Client
 	WithHashType(hashType string) Client
 	WithInteractionType(interactionType string) Client
-	WithText(text string) Client
+	WithDisplayText60(text string) Client
+	WithDisplayText200(text string) Client
 	WithURL(url string) Client
 	WithTimeout(timeout time.Duration) Client
 	WithTLSConfig(tlsConfig *tls.Config) Client
@@ -44,7 +47,8 @@ func NewClient() Client {
 		CertificateLevel: CertificateLevel,
 		HashType:         utils.HashTypeSHA512,
 		InteractionType:  InteractionType,
-		Text:             Text,
+		DisplayText60:    DisplayText60,
+		DisplayText200:   DisplayText200,
 		URL:              URL,
 		Timeout:          Timeout,
 	}
@@ -79,8 +83,13 @@ func (c *client) WithInteractionType(interactionType string) Client {
 	return c
 }
 
-func (c *client) WithText(text string) Client {
-	c.config.Text = text
+func (c *client) WithDisplayText60(text string) Client {
+	c.config.DisplayText60 = text
+	return c
+}
+
+func (c *client) WithDisplayText200(text string) Client {
+	c.config.DisplayText200 = text
 	return c
 }
 

@@ -11,8 +11,9 @@ type AuthenticationRequest struct {
 }
 
 type AllowedInteraction struct {
-	Type          string `json:"type"`
-	DisplayText60 string `json:"displayText60"`
+	Type           string `json:"type"`
+	DisplayText60  string `json:"displayText60"`
+	DisplayText200 string `json:"displayText200"`
 }
 
 type AuthenticationResponse struct {
