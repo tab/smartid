@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v0.3.0](https://github.com/tab/smartid/releases/tag/v0.3.0)
+
+### Refactor
+- **refactor(client):** Refactor display text methods for PIN interactions
+
+### Bug Fixes
+- **fix(requests):** Add timeoutMs for FetchAuthenticationSession method
+
 ## [v0.2.1](https://github.com/tab/smartid/releases/tag/v0.2.1)
 
 ### Bug Fixes
