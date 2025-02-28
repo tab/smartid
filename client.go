@@ -16,7 +16,7 @@ const (
 	InteractionType  = requests.InteractionTypeDisplayTextAndPIN
 	DisplayText60    = "Enter PIN1"
 	DisplayText200   = "Confirm the authentication request and enter PIN1"
-	Timeout          = 60 * time.Second
+	Timeout          = requests.Timeout
 	URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
 )
 

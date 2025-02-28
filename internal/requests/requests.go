@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -21,6 +22,9 @@ const (
 	IdleConnTimeout           = 90 * time.Second
 	TLSHandshakeTimeout       = 10 * time.Second
 	Timeout                   = 60 * time.Second
+
+	MinSmartIdTimeout = 1000
+	MaxSmartIdTimeout = 120000
 
 	CertificateLevelQUALIFIED = "QUALIFIED"
 
@@ -117,7 +121,19 @@ func FetchAuthenticationSession(
 ) (*models.AuthenticationResponse, error) {
 	endpoint := fmt.Sprintf("%s/session/%s", cfg.URL, sessionId)
 
-	response, err := httpClient(cfg).R().SetContext(ctx).Get(endpoint)
+	timeout := int(cfg.Timeout.Milliseconds())
+
+	switch {
+	case timeout < MinSmartIdTimeout:
+		timeout = MinSmartIdTimeout
+	case timeout > MaxSmartIdTimeout:
+		timeout = MaxSmartIdTimeout
+	}
+
+	response, err := httpClient(cfg).R().
+		SetContext(ctx).
+		SetQueryParam("timeoutMs", strconv.Itoa(timeout)).
+		Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
