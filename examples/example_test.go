@@ -19,7 +19,8 @@ func Example_CreateSession() {
 		WithCertificateLevel("QUALIFIED").
 		WithHashType("SHA512").
 		WithInteractionType("displayTextAndPIN").
-		WithText("Enter PIN1").
+		WithDisplayText60("Enter PIN1").
+		WithDisplayText200("Confirm the authentication request and enter PIN1").
 		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 		WithTimeout(60 * time.Second)
 
@@ -41,7 +42,8 @@ func Example_FetchSession() {
 		WithCertificateLevel("QUALIFIED").
 		WithHashType("SHA512").
 		WithInteractionType("displayTextAndPIN").
-		WithText("Enter PIN1").
+		WithDisplayText60("Enter PIN1").
+		WithDisplayText200("Confirm the authentication request and enter PIN1").
 		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 		WithTimeout(60 * time.Second)
 
@@ -65,7 +67,8 @@ func Example_ProcessMultipleIdentitiesInBackground() {
 		WithCertificateLevel("QUALIFIED").
 		WithHashType("SHA512").
 		WithInteractionType("displayTextAndPIN").
-		WithText("Enter PIN1").
+		WithDisplayText60("Enter PIN1").
+		WithDisplayText200("Confirm the authentication request and enter PIN1").
 		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 		WithTimeout(60 * time.Second)
 
@@ -131,7 +134,8 @@ func Example_ProcessMultipleIdentitiesInBackground_WithTLS() {
 		WithCertificateLevel("QUALIFIED").
 		WithHashType("SHA512").
 		WithInteractionType("displayTextAndPIN").
-		WithText("Enter PIN1").
+		WithDisplayText60("Enter PIN1").
+		WithDisplayText200("Confirm the authentication request and enter PIN1").
 		WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 		WithTimeout(60 * time.Second).
 		WithTLSConfig(tlsConfig)

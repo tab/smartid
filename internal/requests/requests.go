@@ -22,6 +22,13 @@ const (
 	TLSHandshakeTimeout       = 10 * time.Second
 	Timeout                   = 60 * time.Second
 
+	CertificateLevelQUALIFIED = "QUALIFIED"
+
+	InteractionTypeDisplayTextAndPIN                            = "displayTextAndPIN"
+	InteractionTypeVerificationCodeChoice                       = "verificationCodeChoice"
+	InteractionTypeConfirmationMessage                          = "confirmationMessage"
+	InteractionTypeConfirmationMessageAndVerificationCodeChoice = "confirmationMessageAndVerificationCodeChoice"
+
 	StatusNoSuitableAccount = 471
 	StatusViewSmartIdApp    = 472
 	StatusClientTooOld      = 480
@@ -43,6 +50,17 @@ func CreateAuthenticationSession(
 		return nil, err
 	}
 
+	interaction := models.AllowedInteraction{
+		Type: cfg.InteractionType,
+	}
+
+	switch cfg.InteractionType {
+	case InteractionTypeDisplayTextAndPIN, InteractionTypeVerificationCodeChoice:
+		interaction.DisplayText60 = cfg.DisplayText60
+	case InteractionTypeConfirmationMessage, InteractionTypeConfirmationMessageAndVerificationCodeChoice:
+		interaction.DisplayText200 = cfg.DisplayText200
+	}
+
 	body := models.AuthenticationRequest{
 		RelyingPartyName:       cfg.RelyingPartyName,
 		RelyingPartyUUID:       cfg.RelyingPartyUUID,
@@ -51,10 +69,7 @@ func CreateAuthenticationSession(
 		Hash:                   hash,
 		HashType:               cfg.HashType,
 		AllowedInteractionsOrder: []models.AllowedInteraction{
-			{
-				Type:          cfg.InteractionType,
-				DisplayText60: cfg.Text,
-			},
+			interaction,
 		},
 	}
 
@@ -64,7 +79,8 @@ func CreateAuthenticationSession(
 		return nil, err
 	}
 
-	if response.IsSuccess() {
+	switch response.StatusCode() {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
 		var result Response
 		if err = json.Unmarshal(response.Body(), &result); err != nil {
 			return nil, err
@@ -79,9 +95,8 @@ func CreateAuthenticationSession(
 			Id:   result.Id,
 			Code: code,
 		}, nil
-	}
-
-	switch response.StatusCode() {
+	case http.StatusForbidden:
+		return nil, errors.ErrSmartIdAccessForbidden
 	case StatusNoSuitableAccount:
 		return nil, errors.ErrSmartIdNoSuitableAccount
 	case StatusViewSmartIdApp:
@@ -107,16 +122,15 @@ func FetchAuthenticationSession(
 		return nil, err
 	}
 
-	if response.IsSuccess() {
+	switch response.StatusCode() {
+	case http.StatusOK:
 		var result models.AuthenticationResponse
 		if err = json.Unmarshal(response.Body(), &result); err != nil {
 			return nil, err
 		}
-
 		return &result, nil
-	}
-
-	switch response.StatusCode() {
+	case http.StatusForbidden:
+		return nil, errors.ErrSmartIdAccessForbidden
 	case http.StatusNotFound:
 		return nil, errors.ErrSmartIdSessionNotFound
 	case StatusNoSuitableAccount:

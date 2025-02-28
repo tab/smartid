@@ -29,7 +29,8 @@ func Test_NewClient(t *testing.T) {
 					WithCertificateLevel("QUALIFIED").
 					WithHashType("SHA512").
 					WithInteractionType("displayTextAndPIN").
-					WithText("Enter PIN1").
+					WithDisplayText60("Enter PIN1").
+					WithDisplayText200("Confirm the authentication request and enter PIN1").
 					WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 					WithTimeout(60 * time.Second)
 			},
@@ -40,7 +41,8 @@ func Test_NewClient(t *testing.T) {
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
-					Text:             "Enter PIN1",
+					DisplayText60:    "Enter PIN1",
+					DisplayText200:   "Confirm the authentication request and enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
 					TLSConfig:        nil,
@@ -61,7 +63,8 @@ func Test_NewClient(t *testing.T) {
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
-					Text:             "Enter PIN1",
+					DisplayText60:    "Enter PIN1",
+					DisplayText200:   "Confirm the authentication request and enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
 					TLSConfig:        nil,
@@ -80,7 +83,8 @@ func Test_NewClient(t *testing.T) {
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
-					Text:             "Enter PIN1",
+					DisplayText60:    "Enter PIN1",
+					DisplayText200:   "Confirm the authentication request and enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
 					TLSConfig:        nil,
@@ -99,7 +103,8 @@ func Test_NewClient(t *testing.T) {
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
-					Text:             "Enter PIN1",
+					DisplayText60:    "Enter PIN1",
+					DisplayText200:   "Confirm the authentication request and enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
 					TLSConfig:        nil,
@@ -266,7 +271,7 @@ func Test_WithInteractionType(t *testing.T) {
 	}
 }
 
-func Test_WithText(t *testing.T) {
+func TestClient_WithDisplayText60(t *testing.T) {
 	c := NewClient()
 
 	tests := []struct {
@@ -276,8 +281,8 @@ func Test_WithText(t *testing.T) {
 	}{
 		{
 			name:     "Success",
-			param:    "Enter PIN1",
-			expected: "Enter PIN1",
+			param:    "Please enter PIN1",
+			expected: "Please enter PIN1",
 		},
 		{
 			name:     "Empty",
@@ -288,9 +293,38 @@ func Test_WithText(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c = c.WithText(tt.param)
+			c = c.WithDisplayText60(tt.param)
 			clientImpl := c.(*client)
-			assert.Equal(t, tt.expected, clientImpl.config.Text)
+			assert.Equal(t, tt.expected, clientImpl.config.DisplayText60)
+		})
+	}
+}
+
+func TestClient_WithDisplayText200(t *testing.T) {
+	c := NewClient()
+
+	tests := []struct {
+		name     string
+		param    string
+		expected string
+	}{
+		{
+			name:     "Success",
+			param:    "Please confirm the authentication request and enter PIN1",
+			expected: "Please confirm the authentication request and enter PIN1",
+		},
+		{
+			name:     "Empty",
+			param:    "",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c = c.WithDisplayText200(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.DisplayText200)
 		})
 	}
 }
@@ -377,7 +411,8 @@ func TestClient_WithTLSConfig(t *testing.T) {
 					WithCertificateLevel("QUALIFIED").
 					WithHashType("SHA512").
 					WithInteractionType("displayTextAndPIN").
-					WithText("Enter PIN1").
+					WithDisplayText60("Enter PIN1").
+					WithDisplayText200("Confirm the authentication request and enter PIN1").
 					WithURL("https://sid.demo.sk.ee/smart-id-rp/v2").
 					WithTimeout(60 * time.Second).
 					WithTLSConfig(tlsConfig)
@@ -389,7 +424,8 @@ func TestClient_WithTLSConfig(t *testing.T) {
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
-					Text:             "Enter PIN1",
+					DisplayText60:    "Enter PIN1",
+					DisplayText200:   "Confirm the authentication request and enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
 					TLSConfig:        tlsConfig,
@@ -410,7 +446,8 @@ func TestClient_WithTLSConfig(t *testing.T) {
 					CertificateLevel: "QUALIFIED",
 					HashType:         "SHA512",
 					InteractionType:  "displayTextAndPIN",
-					Text:             "Enter PIN1",
+					DisplayText60:    "Enter PIN1",
+					DisplayText200:   "Confirm the authentication request and enter PIN1",
 					URL:              "https://sid.demo.sk.ee/smart-id-rp/v2",
 					Timeout:          60 * time.Second,
 					TLSConfig:        nil,

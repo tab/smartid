@@ -11,6 +11,7 @@ var (
 	ErrUnsupportedHashType = errors.New("unsupported hash type, allowed hash types are SHA256, SHA384 or SHA512")
 
 	ErrSmartIdProviderError   = errors.New("Smart-ID provider error")
+	ErrSmartIdAccessForbidden = errors.New("Smart-ID access forbidden")
 	ErrSmartIdSessionNotFound = errors.New("Smart-ID session not found or expired")
 
 	ErrSmartIdNoSuitableAccount = errors.New("no suitable account of requested type found")

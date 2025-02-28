@@ -2,6 +2,7 @@ package requests
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +15,151 @@ import (
 	"github.com/tab/smartid/internal/models"
 )
 
+func Test_CreateAuthenticationSession_Body(t *testing.T) {
+	ctx := context.Background()
+
+	identity := "PNOEE-30303039914"
+
+	tests := []struct {
+		name   string
+		before func(w http.ResponseWriter, r *http.Request)
+		cfg    *config.Config
+	}{
+		{
+			name: "Success (displayTextAndPIN)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				var req models.AuthenticationRequest
+				if err := parseRequestBody(r, &req); err != nil {
+					t.Errorf("Error parsing request body: %v", err)
+					return
+				}
+
+				assert.Equal(t, "DEMO", req.RelyingPartyName)
+				assert.Equal(t, "00000000-0000-0000-0000-000000000000", req.RelyingPartyUUID)
+				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
+				assert.Equal(t, "displayTextAndPIN", req.AllowedInteractionsOrder[0].Type)
+				assert.Equal(t, "Enter PIN1", req.AllowedInteractionsOrder[0].DisplayText60)
+				assert.Equal(t, identity, req.NationalIdentityNumber)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				CertificateLevel: "QUALIFIED",
+				InteractionType:  "displayTextAndPIN",
+				DisplayText60:    "Enter PIN1",
+				HashType:         "SHA512",
+				Timeout:          10 * time.Second,
+			},
+		},
+		{
+			name: "Success (verificationCodeChoice)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				var req models.AuthenticationRequest
+				if err := parseRequestBody(r, &req); err != nil {
+					t.Errorf("Error parsing request body: %v", err)
+					return
+				}
+
+				assert.Equal(t, "DEMO", req.RelyingPartyName)
+				assert.Equal(t, "00000000-0000-0000-0000-000000000000", req.RelyingPartyUUID)
+				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
+				assert.Equal(t, "verificationCodeChoice", req.AllowedInteractionsOrder[0].Type)
+				assert.Equal(t, "Enter PIN1", req.AllowedInteractionsOrder[0].DisplayText60)
+				assert.Equal(t, identity, req.NationalIdentityNumber)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				CertificateLevel: "QUALIFIED",
+				InteractionType:  "verificationCodeChoice",
+				DisplayText60:    "Enter PIN1",
+				HashType:         "SHA512",
+				Timeout:          10 * time.Second,
+			},
+		},
+		{
+			name: "Success (confirmationMessage)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				var req models.AuthenticationRequest
+				if err := parseRequestBody(r, &req); err != nil {
+					t.Errorf("Error parsing request body: %v", err)
+					return
+				}
+
+				assert.Equal(t, "DEMO", req.RelyingPartyName)
+				assert.Equal(t, "00000000-0000-0000-0000-000000000000", req.RelyingPartyUUID)
+				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
+				assert.Equal(t, "confirmationMessage", req.AllowedInteractionsOrder[0].Type)
+				assert.Equal(t, "Confirm the authentication request and enter PIN1", req.AllowedInteractionsOrder[0].DisplayText200)
+				assert.Equal(t, identity, req.NationalIdentityNumber)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				CertificateLevel: "QUALIFIED",
+				InteractionType:  "confirmationMessage",
+				DisplayText200:   "Confirm the authentication request and enter PIN1",
+				HashType:         "SHA512",
+				Timeout:          10 * time.Second,
+			},
+		},
+		{
+			name: "Success (confirmationMessageAndVerificationCodeChoice)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				var req models.AuthenticationRequest
+				if err := parseRequestBody(r, &req); err != nil {
+					t.Errorf("Error parsing request body: %v", err)
+					return
+				}
+
+				assert.Equal(t, "DEMO", req.RelyingPartyName)
+				assert.Equal(t, "00000000-0000-0000-0000-000000000000", req.RelyingPartyUUID)
+				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
+				assert.Equal(t, "confirmationMessageAndVerificationCodeChoice", req.AllowedInteractionsOrder[0].Type)
+				assert.Equal(t, "Confirm the authentication request and enter PIN1", req.AllowedInteractionsOrder[0].DisplayText200)
+				assert.Equal(t, identity, req.NationalIdentityNumber)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"sessionID": "8fdb516d-1a82-43ba-b82d-be63df569b86", "code": "1234"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				CertificateLevel: "QUALIFIED",
+				InteractionType:  "confirmationMessageAndVerificationCodeChoice",
+				DisplayText200:   "Confirm the authentication request and enter PIN1",
+				HashType:         "SHA512",
+				Timeout:          10 * time.Second,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testServer := httptest.NewServer(http.HandlerFunc(tt.before))
+			defer testServer.Close()
+
+			tt.cfg.URL = testServer.URL
+
+			_, err := CreateAuthenticationSession(ctx, tt.cfg, identity)
+			assert.NoError(t, err)
+		})
+	}
+}
+
 func Test_CreateAuthenticationSession(t *testing.T) {
 	ctx := context.Background()
 	cfg := &config.Config{
@@ -21,7 +167,8 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 		RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
 		CertificateLevel: "QUALIFIED",
 		InteractionType:  "displayTextAndPIN",
-		Text:             "Enter PIN1",
+		DisplayText60:    "Enter PIN1",
+		DisplayText200:   "Confirm the authentication request and enter PIN1",
 		HashType:         "SHA512",
 		Timeout:          10 * time.Second,
 	}
@@ -48,6 +195,18 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 			},
 			err:   nil,
 			error: false,
+		},
+		{
+			name: "Error: Forbidden",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte(`{"title": "Forbidden", "status": 403, "detail": "Forbidden"}`))
+			},
+			identity: "PNOEE-30303039914",
+			expected: &Response{},
+			err:      errors.ErrSmartIdAccessForbidden,
+			error:    true,
 		},
 		{
 			name: "Error: Not Found",
@@ -162,7 +321,8 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 		RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
 		CertificateLevel: "QUALIFIED",
 		InteractionType:  "displayTextAndPIN",
-		Text:             "Enter PIN1",
+		DisplayText60:    "Enter PIN1",
+		DisplayText200:   "Confirm the authentication request and enter PIN1",
 		HashType:         "SHA512",
 		Timeout:          10 * time.Second,
 	}
@@ -218,6 +378,18 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 			},
 			err:   nil,
 			error: false,
+		},
+		{
+			name: "Error: Forbidden",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte(`{"title": "Forbidden", "status": 403, "detail": "Forbidden"}`))
+			},
+			id:       id,
+			expected: &models.AuthenticationResponse{},
+			err:      errors.ErrSmartIdAccessForbidden,
+			error:    true,
 		},
 		{
 			name: "Error: USER_REFUSED",
@@ -355,4 +527,10 @@ func Test_FetchAuthenticationSession(t *testing.T) {
 			}
 		})
 	}
+}
+
+func parseRequestBody(r *http.Request, v interface{}) error {
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	return decoder.Decode(v)
 }

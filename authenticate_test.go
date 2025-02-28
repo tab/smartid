@@ -64,12 +64,12 @@ func Test_CreateSession(t *testing.T) {
 			testServer := httptest.NewServer(http.HandlerFunc(tt.before))
 			defer testServer.Close()
 
-			client := NewClient()
-			client.WithRelyingPartyName("DEMO").
+			c := NewClient()
+			c.WithRelyingPartyName("DEMO").
 				WithRelyingPartyUUID("00000000-0000-0000-0000-000000000000").
 				WithURL(testServer.URL)
 
-			session, err := client.CreateSession(ctx, tt.identity)
+			session, err := c.CreateSession(ctx, tt.identity)
 
 			if tt.err != nil {
 				assert.Error(t, err)
