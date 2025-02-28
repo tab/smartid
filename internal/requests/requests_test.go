@@ -39,6 +39,8 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
 				assert.Equal(t, "displayTextAndPIN", req.AllowedInteractionsOrder[0].Type)
 				assert.Equal(t, "Enter PIN1", req.AllowedInteractionsOrder[0].DisplayText60)
+				assert.Equal(t, "SHA512", req.HashType)
+				assert.Equal(t, "random-nonce-123", req.Nonce)
 				assert.Equal(t, identity, req.NationalIdentityNumber)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -52,6 +54,7 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				InteractionType:  "displayTextAndPIN",
 				DisplayText60:    "Enter PIN1",
 				HashType:         "SHA512",
+				Nonce:            "random-nonce-123",
 				Timeout:          10 * time.Second,
 			},
 		},
@@ -69,6 +72,8 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
 				assert.Equal(t, "verificationCodeChoice", req.AllowedInteractionsOrder[0].Type)
 				assert.Equal(t, "Enter PIN1", req.AllowedInteractionsOrder[0].DisplayText60)
+				assert.Equal(t, "SHA512", req.HashType)
+				assert.Equal(t, "random-nonce-123", req.Nonce)
 				assert.Equal(t, identity, req.NationalIdentityNumber)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -82,6 +87,7 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				InteractionType:  "verificationCodeChoice",
 				DisplayText60:    "Enter PIN1",
 				HashType:         "SHA512",
+				Nonce:            "random-nonce-123",
 				Timeout:          10 * time.Second,
 			},
 		},
@@ -99,6 +105,8 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
 				assert.Equal(t, "confirmationMessage", req.AllowedInteractionsOrder[0].Type)
 				assert.Equal(t, "Confirm the authentication request and enter PIN1", req.AllowedInteractionsOrder[0].DisplayText200)
+				assert.Equal(t, "SHA512", req.HashType)
+				assert.Equal(t, "random-nonce-123", req.Nonce)
 				assert.Equal(t, identity, req.NationalIdentityNumber)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -112,6 +120,7 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				InteractionType:  "confirmationMessage",
 				DisplayText200:   "Confirm the authentication request and enter PIN1",
 				HashType:         "SHA512",
+				Nonce:            "random-nonce-123",
 				Timeout:          10 * time.Second,
 			},
 		},
@@ -129,6 +138,8 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				assert.Equal(t, "QUALIFIED", req.CertificateLevel)
 				assert.Equal(t, "confirmationMessageAndVerificationCodeChoice", req.AllowedInteractionsOrder[0].Type)
 				assert.Equal(t, "Confirm the authentication request and enter PIN1", req.AllowedInteractionsOrder[0].DisplayText200)
+				assert.Equal(t, "SHA512", req.HashType)
+				assert.Equal(t, "random-nonce-123", req.Nonce)
 				assert.Equal(t, identity, req.NationalIdentityNumber)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -142,6 +153,7 @@ func Test_CreateAuthenticationSession_Body(t *testing.T) {
 				InteractionType:  "confirmationMessageAndVerificationCodeChoice",
 				DisplayText200:   "Confirm the authentication request and enter PIN1",
 				HashType:         "SHA512",
+				Nonce:            "random-nonce-123",
 				Timeout:          10 * time.Second,
 			},
 		},
@@ -170,6 +182,7 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 		DisplayText60:    "Enter PIN1",
 		DisplayText200:   "Confirm the authentication request and enter PIN1",
 		HashType:         "SHA512",
+		Nonce:            "random-nonce-123",
 		Timeout:          10 * time.Second,
 	}
 

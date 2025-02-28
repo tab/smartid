@@ -11,6 +11,7 @@ type Config struct {
 	RelyingPartyUUID string
 	CertificateLevel string
 	HashType         string
+	Nonce            string
 	InteractionType  string
 	DisplayText60    string
 	DisplayText200   string
