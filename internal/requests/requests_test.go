@@ -313,6 +313,90 @@ func Test_CreateAuthenticationSession(t *testing.T) {
 	}
 }
 
+func Test_FetchAuthenticationSession_Timeout(t *testing.T) {
+	ctx := context.Background()
+
+	id := "8fdb516d-1a82-43ba-b82d-be63df569b86"
+
+	tests := []struct {
+		name   string
+		before func(w http.ResponseWriter, r *http.Request)
+		cfg    *config.Config
+	}{
+		{
+			name: "Success (timeout less than MinSmartIdTimeout = 1000 ms)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "1000", r.URL.Query().Get("timeoutMs"))
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"state": "COMPLETE"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				Timeout:          500 * time.Millisecond,
+			},
+		},
+		{
+			name: "Success (timeout greater than MaxSmartIdTimeout = 120000 ms)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "120000", r.URL.Query().Get("timeoutMs"))
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"state": "COMPLETE"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				Timeout:          360 * time.Second,
+			},
+		},
+		{
+			name: "Success (timeout within MinSmartIdTimeout and MaxSmartIdTimeout)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "10000", r.URL.Query().Get("timeoutMs"))
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"state": "COMPLETE"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+				Timeout:          10 * time.Second,
+			},
+		},
+		{
+			name: "Success (timeout not set)",
+			before: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "1000", r.URL.Query().Get("timeoutMs"))
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"state": "COMPLETE"}`))
+			},
+			cfg: &config.Config{
+				RelyingPartyName: "DEMO",
+				RelyingPartyUUID: "00000000-0000-0000-0000-000000000000",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testServer := httptest.NewServer(http.HandlerFunc(tt.before))
+			defer testServer.Close()
+
+			tt.cfg.URL = testServer.URL
+
+			_, err := FetchAuthenticationSession(ctx, tt.cfg, id)
+			assert.NoError(t, err)
+		})
+	}
+}
+
 func Test_FetchAuthenticationSession(t *testing.T) {
 	ctx := context.Background()
 
