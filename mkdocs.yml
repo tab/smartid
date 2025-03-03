@@ -1,0 +1,30 @@
+site_name: smartid
+site_url: https://tab.github.io/smartid
+site_author: tab
+site_description: Golang client for the Smart-ID API
+
+repo_name: tab/smartid
+repo_url: https://github.com/tab/smartid
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: blue-grey
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true

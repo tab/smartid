@@ -1,25 +1,6 @@
-# Go Smart-ID client
+# Usage
 
-Golang client for the Smart-ID API (https://www.smart-id.com).
-It is a simple wrapper around the API, which helps easily integrate Smart-ID authentication into Golang applications.
-
-## Features
-
-- Flexible client configuration
-- Concurrent processing
-- Optional TLS configuration (certificate pinning)
-
-## Installation
-
-Use `go get` to install the package
-
-```sh
-go get -u github.com/tab/smartid
-```
-
-## Usage
-
-### Creating a Client
+## Configure a client
 
 Create a new client using `NewClient()` and customize its configuration using chainable methods.
 
@@ -54,7 +35,30 @@ func main() {
 }
 ```
 
-### Start Authentication
+Check client default configuration values:
+
+```go
+const (
+  CertificateLevel = requests.CertificateLevelQUALIFIED
+  InteractionType  = requests.InteractionTypeDisplayTextAndPIN
+  DisplayText60    = "Enter PIN1"
+  DisplayText200   = "Confirm the authentication request and enter PIN1"
+  Timeout          = requests.Timeout
+  URL              = "https://sid.demo.sk.ee/smart-id-rp/v2"
+)
+
+cfg := &config.Config{
+  CertificateLevel: CertificateLevel,
+  HashType:         utils.HashTypeSHA512,
+  InteractionType:  InteractionType,
+  DisplayText60:    DisplayText60,
+  DisplayText200:   DisplayText200,
+  URL:              URL,
+  Timeout:          Timeout,
+}
+```
+
+## Start authentication
 
 Initiate a new authentication session with the `Smart-ID` provider by calling `CreateSession`.
 This function generates a random hash, constructs the session request, and returns a session that includes an identifier and a verification code.
@@ -74,7 +78,7 @@ func main() {
 }
 ```
 
-### Fetch Session
+## Fetch authentication session
 
 ```go
 func main() {
@@ -89,7 +93,7 @@ func main() {
 }
 ```
 
-### Async Example
+## Async example
 
 For applications requiring the processing of multiple authentication sessions simultaneously, `Smart-ID` provides a worker model.
 Create a worker using `NewWorker`, configure its concurrency and queue size, and then start processing.
@@ -163,7 +167,7 @@ func main() {
 }
 ```
 
-### Certificate pinning (optional)
+## Certificate pinning (optional)
 
 ```go
 package main
@@ -199,7 +203,7 @@ func main() {
   // Further processing...
 ```
 
-### Prepare Identity
+## Prepare identity
 
 Smart-ID requires a properly formatted identity string. Use the `NewIdentity` function to create this string.
 It combines the identity type, country code, and the identifier value.
@@ -219,17 +223,23 @@ func main() {
 }
 ```
 
-## Documentation
+## Examples
 
-- [Documentation](https://tab.github.io/smartid)
-- [GoDoc](https://pkg.go.dev/github.com/tab/smartid)
-- [Smart-ID Documentation](https://github.com/SK-EID/smart-id-documentation)
+```sh
+go run cmd/client/main.go
+```
 
-## License
+```sh
+Session created: &{f74cc84e-6e43-45f8-b778-ccf3795bb06b 9449}
+Fetched person: &{PNOEE-30303039914 30303039914 TESTNUMBER OK}
+```
 
-Distributed under the MIT License. See `LICENSE` for more information.
+- **f74cc84e-6e43-45f8-b778-ccf3795bb06b** – session id
+- **9449** – verification code
 
-## Acknowledgements
 
-- [SK ID Solutions](https://www.skidsolutions.eu)
-- [Smart-ID](https://www.smart-id.com)
+- **PNOEE-30303039914** – formatted identity
+- **30303039914** – personal identification code
+- **TESTNUMBER** – person first name
+- **OK** – person last name
+
