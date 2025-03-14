@@ -72,6 +72,7 @@ func CreateAuthenticationSession(
 		CertificateLevel:       cfg.CertificateLevel,
 		Hash:                   hash,
 		HashType:               cfg.HashType,
+		Nonce:                  cfg.Nonce,
 		AllowedInteractionsOrder: []models.AllowedInteraction{
 			interaction,
 		},
