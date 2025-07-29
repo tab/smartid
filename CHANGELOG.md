@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [v0.3.1](https://github.com/tab/smartid/releases/tag/v0.3.1)
+
+### Fixes
+- **fix:** Clarify error message for ErrSmartIdAccessForbidden
+
+### Chore
+- **chore:** Update CI tools (golangci-lint, codecov-action)
+- **chore:** Bump dependencies (go.uber.org/mock)
+
+### Documentation
+- **docs:** Add documentation, update README.md
+
 ## [v0.3.0](https://github.com/tab/smartid/releases/tag/v0.3.0)
 
 ### Refactor
