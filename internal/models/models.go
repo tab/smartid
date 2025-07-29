@@ -7,6 +7,7 @@ type AuthenticationRequest struct {
 	CertificateLevel         string               `json:"certificateLevel"`
 	Hash                     string               `json:"hash"`
 	HashType                 string               `json:"hashType"`
+	Nonce                    string               `json:"nonce,omitempty"`
 	AllowedInteractionsOrder []AllowedInteraction `json:"allowedInteractionsOrder"`
 }
 

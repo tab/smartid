@@ -242,6 +242,35 @@ func Test_WithHashType(t *testing.T) {
 	}
 }
 
+func Test_WithNonce(t *testing.T) {
+	c := NewClient()
+
+	tests := []struct {
+		name     string
+		param    string
+		expected string
+	}{
+		{
+			name:     "Success",
+			param:    "1234567890",
+			expected: "1234567890",
+		},
+		{
+			name:     "Empty",
+			param:    "",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c = c.WithNonce(tt.param)
+			clientImpl := c.(*client)
+			assert.Equal(t, tt.expected, clientImpl.config.Nonce)
+		})
+	}
+}
+
 func Test_WithInteractionType(t *testing.T) {
 	c := NewClient()
 

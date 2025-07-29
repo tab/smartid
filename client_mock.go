@@ -156,6 +156,20 @@ func (mr *MockClientMockRecorder) WithInteractionType(interactionType any) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithInteractionType", reflect.TypeOf((*MockClient)(nil).WithInteractionType), interactionType)
 }
 
+// WithNonce mocks base method.
+func (m *MockClient) WithNonce(nonce string) Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithNonce", nonce)
+	ret0, _ := ret[0].(Client)
+	return ret0
+}
+
+// WithNonce indicates an expected call of WithNonce.
+func (mr *MockClientMockRecorder) WithNonce(nonce any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithNonce", reflect.TypeOf((*MockClient)(nil).WithNonce), nonce)
+}
+
 // WithRelyingPartyName mocks base method.
 func (m *MockClient) WithRelyingPartyName(name string) Client {
 	m.ctrl.T.Helper()

@@ -28,6 +28,7 @@ type Client interface {
 	WithRelyingPartyUUID(id string) Client
 	WithCertificateLevel(level string) Client
 	WithHashType(hashType string) Client
+	WithNonce(nonce string) Client
 	WithInteractionType(interactionType string) Client
 	WithDisplayText60(text string) Client
 	WithDisplayText200(text string) Client
@@ -75,6 +76,11 @@ func (c *client) WithCertificateLevel(level string) Client {
 
 func (c *client) WithHashType(hashType string) Client {
 	c.config.HashType = hashType
+	return c
+}
+
+func (c *client) WithNonce(nonce string) Client {
+	c.config.Nonce = nonce
 	return c
 }
 
