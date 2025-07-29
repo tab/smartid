@@ -101,7 +101,7 @@ func CreateAuthenticationSession(
 		}, nil
 	case http.StatusForbidden:
 		return nil, errors.ErrSmartIdAccessForbidden
-	case StatusNoSuitableAccount:
+	case StatusNoSuitableAccount, http.StatusNotFound:
 		return nil, errors.ErrSmartIdNoSuitableAccount
 	case StatusViewSmartIdApp:
 		return nil, errors.ErrSmartIdViewApp
